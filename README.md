@@ -1,6 +1,6 @@
 # sweet-array
 
-Array manipulation library for Clojure with sweet (type) syntax and less pitfalls
+Array manipulation library for Clojure with sweet (type) syntax and fewer pitfalls
 
 ## Rationale
 
