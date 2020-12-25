@@ -63,9 +63,35 @@
         arr))
     `(c/aget ~arr ~@idx)))
 
-(defmacro aset [arr & idxv]
-  (let [[idx [i v]] (split-at (- (count idxv) 2) idxv)]
-    `(c/aset (aget ~arr ~@idx) ~i ~v)))
+(def ^:private primitive-coerce-fns
+  {Boolean/TYPE 'boolean
+   Byte/TYPE 'byte
+   Character/TYPE 'char
+   Short/TYPE 'short
+   Integer/TYPE 'int
+   Long/TYPE 'long
+   Float/TYPE 'float
+   Double/TYPE 'double})
+
+(defmacro aset [arr idx & idxv]
+  (if (symbol? arr)
+    `(aset* ~arr ~idx ~@idxv)
+    `(let [arr# ~arr]
+       (aset* arr# ~idx ~@idxv))))
+
+(defmacro aset* [arr idx & idxv]
+  (if-let [^Class t (infer-type &env arr)]
+    (let [[more v] ((juxt butlast last) idxv)
+          vtype (loop [t (.getComponentType t) more more]
+                  (if (empty? more)
+                    t
+                    (recur (.getComponentType t) (rest more))))
+          f (primitive-coerce-fns vtype)
+          expr (cond->> v f (list f))]
+      (if (seq more)
+        `(c/aset (aget ~arr ~idx ~@(butlast more)) ~(last more) ~expr)
+        `(c/aset ~arr ~idx ~expr)))
+    `(c/aset ~arr ~idx ~@idxv)))
 
 (defn- expand-inits [arr inits]
   (letfn [(rec [idx inits]
@@ -108,16 +134,6 @@
 
 (defmacro cast [type-desc expr]
   (with-meta expr {:tag (tag-fn type-desc)}))
-
-(def ^:private primitive-coerce-fns
-  {Boolean/TYPE 'boolean
-   Byte/TYPE 'byte
-   Character/TYPE 'char
-   Short/TYPE 'short
-   Integer/TYPE 'int
-   Long/TYPE 'long
-   Float/TYPE 'float
-   Double/TYPE 'double})
 
 (defn- expand-into-array [^Class type coll]
   (if (.isArray type)
