@@ -44,11 +44,18 @@
 (defmacro type [desc]
   (type-fn desc))
 
+(defn- warn [fmt & vals]
+  (binding [*out* *err*]
+    (apply printf fmt vals)
+    (newline)))
+
 (defmacro aget [arr & idx]
-  (if (symbol? arr)
-    `(aget* ~arr ~@idx)
-    `(let [arr# ~arr]
-       (aget* arr# ~@idx))))
+  (with-meta
+    (if (symbol? arr)
+      `(aget* ~arr ~@idx)
+      `(let [arr# ~arr]
+         (aget* arr# ~@idx)))
+    (meta &form)))
 
 (defmacro aget* [arr & idx]
   (if-let [^Class t (infer-type &env arr)]
@@ -61,7 +68,12 @@
                    {:tag (type->tag ctype)})
                  (rest idx)))
         arr))
-    `(c/aget ~arr ~@idx)))
+    (do
+      (when (and *warn-on-reflection* (> (count idx) 1))
+        (let [{:keys [line column]} (meta &form)]
+          (warn "Reflection warning, %s:%d:%d - type of first argument for aget cannot be inferred"
+                *file* line column)))
+      `(c/aget ~arr ~@idx))))
 
 (def ^:private primitive-coerce-fns
   {Boolean/TYPE 'boolean
@@ -74,10 +86,12 @@
    Double/TYPE 'double})
 
 (defmacro aset [arr idx & idxv]
-  (if (symbol? arr)
-    `(aset* ~arr ~idx ~@idxv)
-    `(let [arr# ~arr]
-       (aset* arr# ~idx ~@idxv))))
+  (with-meta
+    (if (symbol? arr)
+      `(aset* ~arr ~idx ~@idxv)
+      `(let [arr# ~arr]
+         (aset* arr# ~idx ~@idxv)))
+    (meta &form)))
 
 (defmacro aset* [arr idx & idxv]
   (if-let [^Class t (infer-type &env arr)]
@@ -91,7 +105,12 @@
       (if (seq more)
         `(c/aset (aget ~arr ~idx ~@(butlast more)) ~(last more) ~expr)
         `(c/aset ~arr ~idx ~expr)))
-    `(c/aset ~arr ~idx ~@idxv)))
+    (do
+      (when (and *warn-on-reflection* (> (count idxv) 1))
+        (let [{:keys [line column]} (meta &form)]
+          (warn "Reflection warning, %s:%d:%d - type of first argument for aset cannot be inferred"
+                *file* line column)))
+      `(c/aset ~arr ~idx ~@idxv))))
 
 (defn- expand-inits [arr inits]
   (letfn [(rec [idx inits]
