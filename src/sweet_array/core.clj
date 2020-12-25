@@ -49,31 +49,41 @@
     (apply printf fmt vals)
     (newline)))
 
-(defmacro aget [arr & idx]
-  (with-meta
+(defmacro aget [arr idx & more]
+  (let [meta (-> (meta &form)
+                 (assoc ::form &form))]
     (if (symbol? arr)
-      `(aget* ~arr ~@idx)
-      `(let [arr# ~arr]
-         (aget* arr# ~@idx)))
-    (meta &form)))
+      (with-meta `(aget* ~arr ~idx ~@more) meta)
+      (let [asym (gensym 'arr)]
+        `(let [~asym ~arr]
+           ~(with-meta
+              `(aget* ~asym ~idx ~@more)
+              meta))))))
 
-(defmacro aget* [arr & idx]
+(defmacro aget* [arr idx & more]
   (if-let [^Class t (infer-type &env arr)]
-    (loop [t t arr arr idx idx]
+    (loop [t t, arr arr, idx (cons idx more), n 0]
       (if (seq idx)
-        (let [ctype (.getComponentType t)]
-          (recur ctype
-                 (with-meta
-                   `(c/aget ~arr ~(first idx))
-                   {:tag (type->tag ctype)})
-                 (rest idx)))
+        (if (.isArray t)
+          (let [ctype (.getComponentType t)]
+            (recur ctype
+                   (with-meta
+                     `(c/aget ~arr ~(first idx))
+                     {:tag (type->tag ctype)})
+                   (rest idx)
+                   (inc n)))
+          (let [form (::form (meta &form))
+                msg (str "Can't apply aget to "
+                         (pr-str (second form))
+                         " with more than " n " index(es)")]
+            (throw (ex-info msg {:form form}))))
         arr))
     (do
-      (when (and *warn-on-reflection* (> (count idx) 1))
+      (when (and *warn-on-reflection* (seq more))
         (let [{:keys [line column]} (meta &form)]
           (warn "Reflection warning, %s:%d:%d - type of first argument for aget cannot be inferred"
                 *file* line column)))
-      `(c/aget ~arr ~@idx))))
+      `(c/aget ~arr ~idx ~@more))))
 
 (def ^:private primitive-coerce-fns
   {Boolean/TYPE 'boolean
