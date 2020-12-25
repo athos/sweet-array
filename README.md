@@ -22,14 +22,14 @@ Using Clojure's array facilities, you can write code like the following:
     c))
 ```
 
-Unfortunately, this code does not perform well because it contains some incomprehensible
-reflective calls. To get rid of those problematic reflections, you need to add type hints
-here and there:
+Unfortunately, the performance of this code is no good because it contains a lot of
+reflective calls (some of which cause reflection warnings and some do not (!!)).
+To get rid of those problematic reflections, you need to add type hints here and there:
 
 ```clojure
 (defn ^"[[D" array-mul [^"[[D" a ^"[[D" b]
   (let [nrows (alength a)
-        ncols (alength (aget b 0))
+        ncols (alength ^doubles (aget b 0))
         n (alength b)
         ^"[[D" c (make-array Double/TYPE nrows ncols)]
     (dotimes [i nrows]
@@ -49,7 +49,7 @@ multidemensional arrays (This issue has been reported as
 [CLJ-1289](https://clojure.atlassian.net/browse/CLJ-1289)).
 
 Using `sweet-array`, you can write code that is almost as concise as how you would
-write it naively even though it runs as fast as the second example code:
+write it straightforwardly, while it runs as fast as the optimized one shown above:
 
 ```clojure
 (require '[sweet-array.core :as sa])
