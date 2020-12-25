@@ -50,15 +50,15 @@
     (newline)))
 
 (defmacro aget [arr idx & more]
-  (let [meta (-> (meta &form)
-                 (assoc ::form &form))]
-    (if (symbol? arr)
-      (with-meta `(aget* ~arr ~idx ~@more) meta)
+  (let [m (-> (meta &form)
+              (assoc ::form &form))]
+    (if (and (symbol? arr) (nil? (:tag (meta arr))))
+      (with-meta `(aget* ~arr ~idx ~@more) m)
       (let [asym (gensym 'arr)]
         `(let [~asym ~arr]
            ~(with-meta
               `(aget* ~asym ~idx ~@more)
-              meta))))))
+              m))))))
 
 (defmacro aget* [arr idx & more]
   (if-let [^Class t (infer-type &env arr)]
