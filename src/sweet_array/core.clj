@@ -25,14 +25,11 @@
             (if (vector? desc)
               (str \[ (tag-fn (first desc)))
               (case desc
-                boolean "Z"
-                byte "B"
-                char "C"
-                short "S"
-                int "I"
-                long "J"
-                float "F"
-                double "D"
+                boolean "Z" byte "B" char "C" short "S"
+                int "I" long "J" float "F" double "D"
+                booleans "[Z" bytes "[B" chars "[C" shorts "[S"
+                ints "[I" longs "[J" floats "[F" doubles "[D"
+                objects "[Ljava.lang.Object;"
                 (some-> ^Class (resolve desc)
                         (.getName)
                         ((fn [name] (str \L name \;)))))))]
