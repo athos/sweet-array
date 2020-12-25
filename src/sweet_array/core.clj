@@ -3,10 +3,22 @@
   (:require [clojure.core :as c])
   (:import [clojure.lang Compiler$LocalBinding]))
 
+(defn- type->tag [^Class type]
+  (.getName type))
+
+(defn- tag->type [tag]
+  (Class/forName tag))
+
 (defn- infer-type [&env x]
-  (let [^Compiler$LocalBinding lb (get &env x)]
-    (when (some-> lb (.hasJavaClass))
-      (.getJavaClass lb))))
+  (if-let [^Compiler$LocalBinding lb (get &env x)]
+    (when (.hasJavaClass lb)
+      (.getJavaClass lb))
+    (when-let [v (resolve x)]
+      (when (and (var? v) (not (fn? @v)))
+        (let [tag (:tag (meta v))]
+          (cond-> tag
+            (string? tag)
+            tag->type))))))
 
 (defn tag-fn [desc]
   (letfn [(step [desc]
@@ -30,17 +42,16 @@
   (tag-fn desc))
 
 (defn ^Class type-fn [desc]
-  (Class/forName (tag-fn desc)))
+  (tag->type (tag-fn desc)))
 
 (defmacro type [desc]
   (type-fn desc))
 
-(defn- type->tag [^Class type]
-  (.getName type))
-
 (defmacro aget [arr & idx]
-  `(let [arr# ~arr]
-     (aget* arr# ~@idx)))
+  (if (symbol? arr)
+    `(aget* ~arr ~@idx)
+    `(let [arr# ~arr]
+       (aget* arr# ~@idx))))
 
 (defmacro aget* [arr & idx]
   (if-let [^Class t (infer-type &env arr)]
@@ -88,8 +99,10 @@
       {:tag (tag-fn type-desc)})))
 
 (defmacro aclone [arr]
-  `(let [arr# ~arr]
-     (aclone* arr#)))
+  (if (symbol? arr)
+    `(aclone* ~arr)
+    `(let [arr# ~arr]
+       (aclone* arr#))))
 
 (defmacro aclone* [arr]
   (if-let [t (infer-type &env arr)]
