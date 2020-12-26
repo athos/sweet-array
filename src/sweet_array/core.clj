@@ -102,25 +102,41 @@
    Double/TYPE 'double})
 
 (defmacro aset [arr idx & idxv]
-  (with-meta
-    (if (symbol? arr)
-      `(aset* ~arr ~idx ~@idxv)
-      `(let [arr# ~arr]
-         (aset* arr# ~idx ~@idxv)))
-    (meta &form)))
+  (let [m (-> (meta &form)
+              (assoc ::form &form))]
+    (if (and (symbol? arr) (nil? (:tag (meta arr))))
+      (with-meta `(aset* ~arr ~idx ~@idxv) m)
+      (let [asym (gensym 'arr)]
+        `(let [~asym ~arr]
+           ~(with-meta
+              `(aset* ~asym ~idx ~@idxv)
+              m))))))
 
 (defmacro aset* [arr idx & idxv]
   (if-let [^Class t (infer-type &env arr)]
-    (let [[more v] ((juxt butlast last) idxv)
-          vtype (loop [t (.getComponentType t) more more]
-                  (if (empty? more)
-                    t
-                    (recur (.getComponentType t) (rest more))))
-          f (primitive-coerce-fns vtype)
-          expr (cond->> v f (list f))]
-      (if (seq more)
-        `(c/aset (aget ~arr ~idx ~@(butlast more)) ~(last more) ~expr)
-        `(c/aset ~arr ~idx ~expr)))
+    (if (not (.isArray t))
+      (let [form (::form (meta &form))
+            msg (str "Can't apply aset to "
+                     (pr-str (second form))
+                     ", which is " (.getName t) ", not array")]
+        (throw (ex-info msg {:form form})))
+      (let [[more v] ((juxt butlast last) idxv)
+            vtype (loop [t (.getComponentType t), more more, n 1]
+                    (cond (empty? more) t
+
+                          (not (.isArray t))
+                          (let [form (::form (meta &form))
+                                msg (str "Can't apply aset to "
+                                         (pr-str (second form))
+                                         " with more than " n " index(es)")]
+                            (throw (ex-info msg {:form form})))
+
+                          :else (recur (.getComponentType t) (rest more) (inc n))))
+            f (primitive-coerce-fns vtype)
+            expr (cond->> v f (list f))]
+        (if (seq more)
+          `(c/aset (aget ~arr ~idx ~@(butlast more)) ~(last more) ~expr)
+          `(c/aset ~arr ~idx ~expr))))
     (do
       (when (and *warn-on-reflection* (> (count idxv) 1))
         (let [{:keys [line column]} (meta &form)]
