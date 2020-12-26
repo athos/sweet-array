@@ -9,7 +9,7 @@
 (defn- tag->type [tag]
   (Class/forName tag))
 
-(defn- infer-type [&env x]
+(defn- ^Class infer-type [&env x]
   (if-let [^Compiler$LocalBinding lb (get &env x)]
     (when (.hasJavaClass lb)
       (.getJavaClass lb))
@@ -61,7 +61,7 @@
               m))))))
 
 (defmacro aget* [arr idx & more]
-  (if-let [^Class t (infer-type &env arr)]
+  (if-let [t (infer-type &env arr)]
     (if (not (.isArray t))
       (let [form (::form (meta &form))
             msg (str "Can't apply aget to "
@@ -113,7 +113,7 @@
               m))))))
 
 (defmacro aset* [arr idx & idxv]
-  (if-let [^Class t (infer-type &env arr)]
+  (if-let [t (infer-type &env arr)]
     (if (not (.isArray t))
       (let [form (::form (meta &form))
             msg (str "Can't apply aset to "
