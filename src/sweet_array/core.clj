@@ -173,14 +173,25 @@
       {:tag (tag-fn type-desc)})))
 
 (defmacro aclone [arr]
-  (if (symbol? arr)
-    `(aclone* ~arr)
-    `(let [arr# ~arr]
-       (aclone* arr#))))
+  (let [m (-> (meta &form)
+              (assoc ::form &form))]
+    (if (and (symbol? arr) (nil? (:tag (meta arr))))
+      (with-meta `(aclone* ~arr) m)
+      (let [asym (gensym 'arr)]
+        `(let [~asym ~arr]
+           ~(with-meta
+              `(aclone* ~asym)
+              m))))))
 
 (defmacro aclone* [arr]
   (if-let [t (infer-type &env arr)]
-    (with-meta `(c/aclone ~arr) {:tag (type->tag t)})
+    (if (.isArray t)
+      (with-meta `(c/aclone ~arr) {:tag (type->tag t)})
+      (let [form (::form (meta &form))
+            msg (str "Can't apply aset to "
+                     (pr-str (second form))
+                     ", which is " (.getName t) ", not array")]
+        (throw (ex-info msg {:form form}))))
     `(c/aclone ~arr)))
 
 (defmacro cast [type-desc expr]
