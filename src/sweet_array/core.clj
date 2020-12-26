@@ -1,5 +1,5 @@
 (ns sweet-array.core
-  (:refer-clojure :exclude [aclone aget aset cast into-array type])
+  (:refer-clojure :exclude [aclone aget aset cast instance? into-array type])
   (:require [clojure.core :as c])
   (:import [clojure.lang Compiler$LocalBinding]))
 
@@ -43,6 +43,9 @@
 
 (defmacro type [desc]
   (type-fn desc))
+
+(defmacro instance? [type-desc x]
+  `(c/instance? ~(type-fn type-desc) ~x))
 
 (defn- warn [fmt & vals]
   (binding [*out* *err*]
