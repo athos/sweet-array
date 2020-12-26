@@ -144,33 +144,40 @@
                 *file* line column)))
       `(c/aset ~arr ~idx ~@idxv))))
 
-(defn- expand-inits [arr inits]
-  (letfn [(rec [idx inits]
-            (if (vector? inits)
-              (for [[i inits] (map-indexed vector inits)
-                    expr (rec (conj idx i) inits)]
-                expr)
-              `((aset ~arr ~@idx ~inits))))]
-    (rec [] inits)))
+(defn- expand-inits [^Class t inits]
+  (if (.isArray t)
+    (if (vector? inits)
+      (let [asym (gensym 'arr)
+            ctype (.getComponentType t)]
+        `(let [~asym ~(with-meta
+                        `(make-array ~ctype ~(count inits))
+                        {:tag (type->tag t)})]
+           ~@(map-indexed
+              (fn [i init] `(c/aset ~asym ~i ~(expand-inits ctype init)))
+              inits)
+           ~asym))
+      (throw
+       (ex-info (str (.getName t) " expected, but got " (pr-str inits))
+                {:type t :init inits})))
+    (if-let [f (primitive-coerce-fns t)]
+      `(~f ~inits)
+      inits)))
 
 (defmacro new [type-desc & args]
-  (let [t (type-fn type-desc)
-        [comp-type _] (loop [t t l 0]
-                        (if (.isArray t)
-                          (recur (.getComponentType t) (inc l))
-                          [t l]))]
-    (with-meta
-      (if (some-> (first args) vector?)
-        (let [arr (with-meta (gensym 'arr) {:tag (tag-fn type-desc)})
-              dims (loop [inits (first args) dims []]
-                     (if (vector? inits)
-                       (recur (first inits) (conj dims (count inits)))
-                       dims))]
-          `(let [~arr (make-array ~comp-type ~@dims)]
-             ~@(expand-inits arr (first args))
-             ~arr))
-        `(make-array ~comp-type ~@args))
-      {:tag (tag-fn type-desc)})))
+  (let [t (type-fn type-desc)]
+    (if (some-> (first args) vector?)
+      (expand-inits t (first args))
+      (loop [t' t args' args]
+        (if (seq args')
+          (if (.isArray t')
+            (recur (.getComponentType t') (rest args'))
+            (throw
+             (ex-info (str (.getName t) " can't take more than "
+                           (count args) " index(es)")
+                      {})))
+          (with-meta
+            `(make-array ~t' ~@args)
+            {:tag (type-fn type-desc)}))))))
 
 (defmacro aclone [arr]
   (let [m (-> (meta &form)
