@@ -20,20 +20,31 @@
             (string? tag)
             tag->type))))))
 
-(defn tag-fn [desc]
-  (letfn [(step [desc]
-            (if (vector? desc)
-              (str \[ (tag-fn (first desc)))
-              (case desc
-                boolean "Z" byte "B" char "C" short "S"
-                int "I" long "J" float "F" double "D"
-                booleans "[Z" bytes "[B" chars "[C" shorts "[S"
-                ints "[I" longs "[J" floats "[F" doubles "[D"
-                objects "[Ljava.lang.Object;"
-                (some-> ^Class (resolve desc)
-                        (.getName)
-                        ((fn [name] (str \L name \;)))))))]
-    (step desc)))
+(defn tag-fn [type-desc]
+  (letfn [(error! []
+            (throw
+             (ex-info (str "Invalid type descriptor: " (pr-str type-desc))
+                      {:descriptor type-desc})))
+          (step [desc]
+            (cond (vector? desc)
+                  (if (= (count desc) 1)
+                    (str \[ (step (first desc)))
+                    (error!))
+
+                  (symbol? desc)
+                  (case desc
+                    boolean "Z" byte "B" char "C" short "S"
+                    int "I" long "J" float "F" double "D"
+                    booleans "[Z" bytes "[B" chars "[C" shorts "[S"
+                    ints "[I" longs "[J" floats "[F" doubles "[D"
+                    objects "[Ljava.lang.Object;"
+                    (or (some-> ^Class (resolve desc)
+                                (.getName)
+                                ((fn [name] (str \L name \;))))
+                        (error!)))
+
+                  :else (error!)))]
+    (step type-desc)))
 
 (defmacro tag [desc]
   (tag-fn desc))
