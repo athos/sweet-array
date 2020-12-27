@@ -218,11 +218,15 @@
       `(~f ~coll)
       coll)))
 
-(defmacro into-array [type-desc coll]
-  (let [t (type-fn type-desc)
-        ctype (.getComponentType t)]
-    (with-meta
-      (if (.isArray ctype)
-        (expand-into-array t coll)
-        `(c/into-array ~ctype ~coll))
-      {:tag (tag-fn type-desc)})))
+(defmacro into-array
+  ([type-desc coll]
+   `(into-array ~type-desc nil ~coll))
+  ([type-desc xform coll]
+   (let [t (type-fn type-desc)
+         ctype (.getComponentType t)
+         coll (cond->> coll xform (list `eduction xform))]
+     (with-meta
+       (if (.isArray ctype)
+         (expand-into-array t coll)
+         `(c/into-array ~ctype ~coll))
+       {:tag (tag-fn type-desc)}))))
