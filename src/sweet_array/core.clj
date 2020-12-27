@@ -95,14 +95,14 @@
       `(c/aget ~arr ~idx ~@more))))
 
 (def ^:private primitive-coerce-fns
-  {Boolean/TYPE 'boolean
-   Byte/TYPE 'byte
-   Character/TYPE 'char
-   Short/TYPE 'short
-   Integer/TYPE 'int
-   Long/TYPE 'long
-   Float/TYPE 'float
-   Double/TYPE 'double})
+  {Boolean/TYPE `boolean
+   Byte/TYPE `byte
+   Character/TYPE `char
+   Short/TYPE `short
+   Integer/TYPE `int
+   Long/TYPE `long
+   Float/TYPE `float
+   Double/TYPE `double})
 
 (defmacro aset [arr idx & idxv]
   (let [m (-> (meta &form)
