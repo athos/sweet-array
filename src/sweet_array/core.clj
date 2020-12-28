@@ -245,7 +245,7 @@
   ([type-desc xform coll]
    (let [t (type-fn type-desc)
          ctype (.getComponentType t)
-         coll (cond->> coll xform (list `eduction xform))]
+         coll (cond->> coll xform (list `sequence xform))]
      (with-meta
        (if (.isArray ctype)
          (expand-into-array t coll)
