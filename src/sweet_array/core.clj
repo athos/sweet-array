@@ -1,7 +1,8 @@
 (ns sweet-array.core
   (:refer-clojure :exclude [aclone aget aset cast instance? into-array type])
   (:require [clojure.core :as c])
-  (:import [clojure.lang Compiler$LocalBinding]))
+  (:import [clojure.lang Compiler$LocalBinding]
+           [java.lang.reflect Array]))
 
 (defn- type->tag [^Class type]
   (.getName type))
@@ -153,13 +154,28 @@
                 *file* line column)))
       `(c/aset ~arr ~idx ~@idxv))))
 
+(def array-ctor-fns
+  {Boolean/TYPE `boolean-array
+   Byte/TYPE `byte-array
+   Character/TYPE `char-array
+   Short/TYPE `short-array
+   Integer/TYPE `int-array
+   Long/TYPE `long-array
+   Float/TYPE `float-array
+   Double/TYPE `double-array})
+
+(defn- array-ctor-form [t size]
+  (if-let [f (array-ctor-fns t)]
+    `(~f ~size)
+    `(Array/newInstance ~t ~size)))
+
 (defn- expand-inits [^Class t inits]
   (if (.isArray t)
     (if (vector? inits)
       (let [asym (gensym 'arr)
             ctype (.getComponentType t)]
         `(let [~asym ~(with-meta
-                        `(make-array ~ctype ~(count inits))
+                        (array-ctor-form ctype (count inits))
                         {:tag (type->tag t)})]
            ~@(map-indexed
               (fn [i init] `(c/aset ~asym ~i ~(expand-inits ctype init)))
@@ -176,17 +192,19 @@
   (let [t (type-fn type-desc)]
     (if (some-> (first args) vector?)
       (expand-inits t (first args))
-      (loop [t' t args' args]
+      (loop [t' t args' args n 0]
         (if (seq args')
           (if (.isArray t')
-            (recur (.getComponentType t') (rest args'))
+            (recur (.getComponentType t') (rest args') (inc n))
             (throw
              (ex-info (str (.getName t) " can't take more than "
                            (count args) " index(es)")
                       {})))
           (with-meta
-            `(make-array ~t' ~@args)
-            {:tag (type-fn type-desc)}))))))
+            (if (> n 1)
+              `(Array/newInstance ~t' (sweet-array.core/new [~'int] [~@args]))
+              (array-ctor-form t' (first args)))
+            {:tag (type->tag t)}))))))
 
 (defmacro aclone [arr]
   (expand-to-macro* `aclone* &form arr))
