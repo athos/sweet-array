@@ -4,7 +4,7 @@ Array manipulation library for Clojure with sweet (type) syntax and fewer pitfal
 
 ## Rationale
 
-Using Clojure's array facilities, you can write code like the following:
+Using Clojure's array functions, you can write code like the following:
 
 ```clojure
 (defn array-mul [a b]
@@ -22,8 +22,9 @@ Using Clojure's array facilities, you can write code like the following:
     c))
 ```
 
-Unfortunately, the performance of this code is no good because it contains a lot of
-reflective calls (some of which cause reflection warnings and some do not (!!)).
+Seems good? Unfortunately, the performance of this code is not as good as it looks.
+That’s because it contains a lot of reflective calls, some of which will be caught
+by the compiler as reflection warnings, the others will not!!
 To get rid of those problematic reflections, you need to add type hints here and there:
 
 ```clojure
@@ -42,10 +43,10 @@ To get rid of those problematic reflections, you need to add type hints here and
     c))
 ```
 
-Knowing where to put type hints requires an extensive understanding of how the Clojure
-compiler works and how array manipulation functions are implemented.
-Roughly speaking, however, Clojure's array functions are not very good at handling
-multidemensional arrays (This issue has been reported as
+Knowing why and where to put type hints requires an extensive understanding of
+how the Clojure compiler works and how array functions are implemented.
+But roughly speaking, Clojure's array functions are not very good at handling
+multi-demensional arrays (This issue has been reported as
 [CLJ-1289](https://clojure.atlassian.net/browse/CLJ-1289)).
 
 Using `sweet-array`, you can write code that is almost as concise as how you would
@@ -71,9 +72,9 @@ write it straightforwardly, while it runs as fast as the optimized one shown abo
     c))
 ```
 
-`sweet-array` tries to make use of the static types inferred by the Clojure compiler
-as much as possible, and inserts necessary type hints implicitly.
-So, you don't have to add type hints yourself in most cases.
+`sweet-array` leverages the static types inferred by the Clojure compiler
+to inserts necessary type hints implicitly, so you don't have to add
+type hints yourself in most cases.
 
 Also, `sweet-array` adopts "sweet" type syntax (e.g. `[[double]]` and `[String]`),
 so you don't have to be bothered with cryptic array type hints (e.g. `^"[[D"` and
