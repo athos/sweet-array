@@ -63,16 +63,19 @@
     (apply printf fmt vals)
     (newline)))
 
-(defmacro aget [arr idx & more]
+(defn- expand-to-macro* [macro* &form arr & args]
   (let [m (-> (meta &form)
               (assoc ::form &form))]
     (if (and (symbol? arr) (nil? (:tag (meta arr))))
-      (with-meta `(aget* ~arr ~idx ~@more) m)
+      (with-meta `(~macro* ~arr ~@args) m)
       (let [asym (gensym 'arr)]
         `(let [~asym ~arr]
            ~(with-meta
-              `(aget* ~asym ~idx ~@more)
+              `(~macro* ~asym ~@args)
               m))))))
+
+(defmacro aget [arr idx & more]
+  (apply expand-to-macro* `aget* &form arr idx more))
 
 (defmacro aget* [arr idx & more]
   (if-let [t (infer-type &env arr)]
@@ -116,15 +119,7 @@
    Double/TYPE `double})
 
 (defmacro aset [arr idx & idxv]
-  (let [m (-> (meta &form)
-              (assoc ::form &form))]
-    (if (and (symbol? arr) (nil? (:tag (meta arr))))
-      (with-meta `(aset* ~arr ~idx ~@idxv) m)
-      (let [asym (gensym 'arr)]
-        `(let [~asym ~arr]
-           ~(with-meta
-              `(aset* ~asym ~idx ~@idxv)
-              m))))))
+  (apply expand-to-macro* `aset* &form arr idx idxv))
 
 (defmacro aset* [arr idx & idxv]
   (if-let [t (infer-type &env arr)]
@@ -194,15 +189,7 @@
             {:tag (type-fn type-desc)}))))))
 
 (defmacro aclone [arr]
-  (let [m (-> (meta &form)
-              (assoc ::form &form))]
-    (if (and (symbol? arr) (nil? (:tag (meta arr))))
-      (with-meta `(aclone* ~arr) m)
-      (let [asym (gensym 'arr)]
-        `(let [~asym ~arr]
-           ~(with-meta
-              `(aclone* ~asym)
-              m))))))
+  (expand-to-macro* `aclone* &form arr))
 
 (defmacro aclone* [arr]
   (if-let [t (infer-type &env arr)]
