@@ -223,13 +223,18 @@
 (defmacro cast [type-desc expr]
   (with-meta expr {:tag (tag-fn type-desc)}))
 
+(defn- into-array-form [t coll]
+  (if-let [f (array-ctor-fns t)]
+    `(~f ~coll)
+    `(c/into-array ~t ~coll)))
+
 (defn- expand-into-array [^Class type coll]
   (if (.isArray type)
     (let [ctype (.getComponentType type)
           coll-sym (gensym 'coll)]
-      `(c/into-array ~ctype
-                     (for [~coll-sym ~coll]
-                       ~(expand-into-array ctype coll-sym))))
+      (into-array-form ctype
+                       `(for [~coll-sym ~coll]
+                          ~(expand-into-array ctype coll-sym))))
     (if-let [f (primitive-coerce-fns type)]
       `(~f ~coll)
       coll)))
@@ -244,5 +249,5 @@
      (with-meta
        (if (.isArray ctype)
          (expand-into-array t coll)
-         `(c/into-array ~ctype ~coll))
+         (into-array-form ctype coll))
        {:tag (tag-fn type-desc)}))))
