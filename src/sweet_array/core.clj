@@ -111,13 +111,13 @@
 
 (def ^:private primitive-coerce-fns
   {Boolean/TYPE `boolean
-   Byte/TYPE `byte
-   Character/TYPE `char
-   Short/TYPE `short
-   Integer/TYPE `int
-   Long/TYPE `long
-   Float/TYPE `float
-   Double/TYPE `double})
+   Byte/TYPE `unchecked-byte
+   Character/TYPE `unchecked-char
+   Short/TYPE `unchecked-short
+   Integer/TYPE `unchecked-int
+   Long/TYPE `unchecked-long
+   Float/TYPE `unchecked-float
+   Double/TYPE `unchecked-double})
 
 (defmacro aset [arr idx & idxv]
   (apply expand-to-macro* `aset* &form arr idx idxv))
