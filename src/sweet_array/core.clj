@@ -1,7 +1,7 @@
 (ns sweet-array.core
   (:refer-clojure :exclude [aclone aget aset cast instance? into-array type])
   (:require [clojure.core :as c])
-  (:import [clojure.lang Compiler$LocalBinding]
+  (:import [clojure.lang Compiler$LocalBinding RT]
            [java.lang.reflect Array]))
 
 (defn- type->tag [^Class type]
@@ -64,6 +64,12 @@
     (apply printf fmt vals)
     (newline)))
 
+(defn- rt-aget [arr idx]
+  `(RT/aget ~arr (unchecked-int ~idx)))
+
+(defn- rt-aset [arr idx expr]
+  `(RT/aset ~arr (unchecked-int ~idx) ~expr))
+
 (defn- expand-to-macro* [macro* &form arr & args]
   (let [m (-> (meta &form)
               (assoc ::form &form))]
@@ -92,7 +98,7 @@
             (let [ctype (.getComponentType t)]
               (recur ctype
                      (with-meta
-                       `(c/aget ~arr ~(first idx))
+                       (rt-aget arr (first idx))
                        {:tag (type->tag ctype)})
                      (rest idx)
                      (inc n)))
@@ -145,8 +151,8 @@
             f (primitive-coerce-fns vtype)
             expr (cond->> v f (list f))]
         (if (seq more)
-          `(c/aset (aget ~arr ~idx ~@(butlast more)) ~(last more) ~expr)
-          `(c/aset ~arr ~idx ~expr))))
+          (rt-aset `(aget ~arr ~idx ~@(butlast more)) (last more) expr)
+          (rt-aset arr idx expr))))
     (do
       (when (and *warn-on-reflection* (> (count idxv) 1))
         (let [{:keys [line column]} (meta &form)]
@@ -178,7 +184,8 @@
                         (array-ctor-form ctype (count inits))
                         {:tag (type->tag t)})]
            ~@(map-indexed
-              (fn [i init] `(c/aset ~asym ~i ~(expand-inits ctype init)))
+              (fn [i init]
+                (rt-aset asym i (expand-inits ctype init)))
               inits)
            ~asym))
       (throw
