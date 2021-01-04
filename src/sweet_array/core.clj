@@ -197,21 +197,26 @@
 
 (defmacro new [type-desc & args]
   (let [t (type-fn type-desc)]
-    (if (some-> (first args) vector?)
-      (expand-inits t (first args))
-      (loop [t' t args' args n 0]
-        (if (seq args')
-          (if (.isArray t')
-            (recur (.getComponentType t') (rest args') (inc n))
-            (throw
-             (ex-info (str (.getName t) " can't take more than "
-                           (count args) " index(es)")
-                      {})))
-          (with-meta
-            (if (> n 1)
-              `(Array/newInstance ~t' (sweet-array.core/new [~'int] [~@args]))
-              (array-ctor-form t' (first args)))
-            {:tag (type->tag t)}))))))
+    (cond (empty? args)
+          `(sweet-array.core/new ~type-desc 0)
+          
+          (some-> (first args) vector?)
+          (expand-inits t (first args))
+          
+          :else
+          (loop [t' t args' args n 0]
+            (if (seq args')
+              (if (.isArray t')
+                (recur (.getComponentType t') (rest args') (inc n))
+                (throw
+                 (ex-info (str (.getName t) " can't take more than "
+                               (count args) " index(es)")
+                          {})))
+              (with-meta
+                (if (> n 1)
+                  `(Array/newInstance ~t' (sweet-array.core/new [~'int] [~@args']))
+                  (array-ctor-form t' (first args')))
+                {:tag (type->tag t)}))))))
 
 (defmacro aclone [arr]
   (expand-to-macro* `aclone* &form arr))
