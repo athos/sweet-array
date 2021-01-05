@@ -24,7 +24,7 @@
 (defn tag-fn [type-desc]
   (letfn [(error! []
             (throw
-             (ex-info (str "Invalid type descriptor: " (pr-str type-desc))
+             (ex-info (str "Invalid array type descriptor: " (pr-str type-desc))
                       {:descriptor type-desc})))
           (step [desc]
             (cond (vector? desc)
@@ -39,12 +39,14 @@
                     booleans "[Z" bytes "[B" chars "[C" shorts "[S"
                     ints "[I" longs "[J" floats "[F" doubles "[D"
                     objects "[Ljava.lang.Object;"
-                    (or (some-> ^Class (resolve desc)
-                                (.getName)
-                                ((fn [name] (str \L name \;))))
+                    (or (when-let [ret (resolve desc)]
+                          (when (class? ret)
+                            (str \L (.getName ^Class ret) \;)))
                         (error!)))
 
                   :else (error!)))]
+    (when-not (vector? type-desc)
+      (error!))
     (step type-desc)))
 
 (defmacro tag [desc]
