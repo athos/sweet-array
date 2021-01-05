@@ -172,8 +172,8 @@
 
 (defn- array-ctor-form [t size]
   (if-let [f (array-ctor-fns t)]
-    `(~f ~size)
-    `(Array/newInstance ~t ~size)))
+    `(~f (unchecked-int ~size))
+    `(Array/newInstance ~t (unchecked-int ~size))))
 
 (defn- expand-inits [^Class t inits]
   (if (.isArray t)
