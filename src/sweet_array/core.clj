@@ -188,9 +188,7 @@
                 (rt-aset asym i (expand-inits ctype init)))
               inits)
            ~asym))
-      (throw
-       (ex-info (str (.getName t) " expected, but got " (pr-str inits))
-                {:type t :init inits})))
+      inits)
     (if-let [f (primitive-coerce-fns t)]
       `(~f ~inits)
       inits)))
