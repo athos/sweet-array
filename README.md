@@ -1,4 +1,5 @@
 # sweet-array
+[![Clojars Project](https://img.shields.io/clojars/v/sweet-array.svg)](https://clojars.org/sweet-array)
 
 Array manipulation library for Clojure with sweet (type) syntax and fewer pitfalls
 
