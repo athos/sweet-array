@@ -214,7 +214,7 @@
                           {})))
               (with-meta
                 (if (> n 1)
-                  `(Array/newInstance ~t' (sweet-array.core/new [~'int] [~@args']))
+                  `(Array/newInstance ~t' (sweet-array.core/new [~'int] [~@args]))
                   (array-ctor-form t' (first args)))
                 {:tag (type->tag t)}))))))
 
