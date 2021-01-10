@@ -21,6 +21,12 @@
             (string? tag)
             tag->type))))))
 
+(def ^:private array-type-tags
+  '{booleans "[Z", bytes "[B", chars "[C"
+    shorts "[S", ints "[I", longs "[J"
+    floats "[F", doubles "[D"
+    objects "[Ljava.lang.Object;"})
+
 (defn tag-fn [type-desc]
   (letfn [(error! []
             (throw
@@ -36,16 +42,15 @@
                   (case desc
                     boolean "Z" byte "B" char "C" short "S"
                     int "I" long "J" float "F" double "D"
-                    booleans "[Z" bytes "[B" chars "[C" shorts "[S"
-                    ints "[I" longs "[J" floats "[F" doubles "[D"
-                    objects "[Ljava.lang.Object;"
-                    (or (when-let [ret (resolve desc)]
+                    (or (array-type-tags desc)
+                        (when-let [ret (resolve desc)]
                           (when (class? ret)
                             (str \L (.getName ^Class ret) \;)))
                         (error!)))
 
                   :else (error!)))]
-    (when-not (vector? type-desc)
+    (when-not (or (vector? type-desc)
+                  (array-type-tags type-desc))
       (error!))
     (step type-desc)))
 
