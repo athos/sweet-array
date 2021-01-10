@@ -81,6 +81,38 @@ Also, `sweet-array` adopts "sweet" type syntax (e.g. `[[double]]` and `[String]`
 so you don't have to be bothered with cryptic array type hints (e.g. `^"[[D"` and
 `^"[Ljava.lang.String;"`) any longer.
 
+## Installation
+
+Add the following to your project dependencies:
+
+[![Clojars Project](https://clojars.org/sweet-array/latest-version.svg)](https://clojars.org/sweet-array)
+
+## Usage
+
+### Array creation
+
+#### `(new <array type> n1 n2 ... nk)`
+
+#### `(new <array type> [expr ...])`
+
+#### `(into-array <array type> coll)`
+
+#### `(into-array <array type> xform coll)`
+
+### Array indexing
+
+#### `(aget array idx1 idx2 ... idxk)`
+
+#### `(aset array idx1 idx2 ... idxk val)`
+
+### Type-related utilities
+
+#### `(type <array type>)`
+
+#### `(instance? <array type> expr)`
+
+## Benchmarks
+
 ## License
 
 Copyright © 2020 Shogo Ohta
