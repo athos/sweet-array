@@ -1,5 +1,5 @@
 (ns sweet-array.core-test
-  (:require [clojure.test :refer [deftest is]]
+  (:require [clojure.test :refer [deftest is are]]
             [sweet-array.core :as sa]))
 
 (deftest type-test
@@ -37,7 +37,13 @@
          (sa/type [ints])))
   (is (= (type (make-array Double/TYPE 0 0 0))
          (sa/type [[[double]]])
-         (sa/type [[doubles]]))))
+         (sa/type [[doubles]])))
+  (are [desc] (thrown? Throwable (macroexpand `(sa/type ~'desc)))
+    42
+    int
+    "String"
+    [int int]
+    [UnknownClass]))
 
 (deftest instance?-test
   (is (sa/instance? [int] (int-array [1 2 3])))
@@ -150,7 +156,10 @@
     (is (= 3 (alength (aget arr 0))))
     (is (= 2 (alength (aget arr 1))))
     (is (= [0 1 2] (seq (aget arr 0))))
-    (is (= [3 4] (seq (aget arr 1))))))
+    (is (= [3 4] (seq (aget arr 1)))))
+  (is (thrown? Throwable (macroexpand `(sa/new [~'int] 2 3)))))
+
+(def ^String s "foobar")
 
 (deftest aclone-test
   (let [arr (int-array [1 2 3])
@@ -165,7 +174,8 @@
     (is (= (sa/type [[boolean]]) (infer arr')))
     (is (not (identical? arr arr')))
     (is (identical? (aget arr 0) (aget arr' 0)))
-    (is (identical? (aget arr 1) (aget arr' 1)))))
+    (is (identical? (aget arr 1) (aget arr' 1))))
+  (is (thrown? Throwable (macroexpand `(sa/aclone s)))))
 
 (deftest into-array-test
   (let [arr (sa/into-array [boolean] (map even? (range 3)))]
@@ -214,6 +224,9 @@
     (is (= 6 (alength arr)))
     (is (= [\a \b \c \d \e \f] (seq arr)))))
 
+(def arr-without-type-hint
+  (sa/new [[int]] 1 1))
+
 (deftest aget-test
   (let [arr (sa/new [int] [100 101 102])
         res (sa/aget arr 1)]
@@ -242,7 +255,14 @@
     (is (= (sa/type [float]) (infer res2)))
     (is (= [1.0 0.0] (seq res2)))
     (is (= Float/TYPE (infer res3)))
-    (is (= 1.0 res3))))
+    (is (= 1.0 res3)))
+  (is (thrown? Throwable (macroexpand `(sa/aget s 0))))
+  (is (re-find #"^Reflection warning"
+               (with-out-str
+                 (binding [*warn-on-reflection* true
+                           *err* *out*]
+                   (macroexpand
+                    `(sa/aget arr-without-type-hint 0 0)))))))
 
 (deftest aset-test
   (let [arr (sa/new [int] [1 2 3])]
@@ -256,4 +276,11 @@
     (sa/aset arr 1 0 1 \z)
     (is (= [\a \b \c] (seq (aget arr 0 0))))
     (is (= [\d \z] (seq (aget arr 1 0))))
-    (is (= [\f] (seq (aget arr 1 1))))))
+    (is (= [\f] (seq (aget arr 1 1)))))
+  (is (thrown? Throwable (macroexpand `(sa/aset s 0 "foo"))))
+  (is (re-find #"^Reflection warning"
+               (with-out-str
+                 (binding [*warn-on-reflection* true
+                           *err* *out*]
+                   (macroexpand
+                    `(sa/aset arr-without-type-hint 0 0 42)))))))
