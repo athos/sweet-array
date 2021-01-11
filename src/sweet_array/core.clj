@@ -212,7 +212,7 @@
     (cond (empty? args)
           `(sweet-array.core/new ~type-desc 0)
           
-          (some-> (first args) vector?)
+          (vector? (first args))
           (expand-inits t (first args))
           
           :else
