@@ -10,6 +10,17 @@
 (defn- tag->type [tag]
   (Class/forName tag))
 
+(def ^:private array-type-tags
+  '{booleans "[Z", bytes "[B", chars "[C"
+    shorts "[S", ints "[I", longs "[J"
+    floats "[F", doubles "[D"
+    objects "[Ljava.lang.Object;"})
+
+(def ^:private array-fn->array-type
+  {booleans 'booleans, bytes 'bytes, chars 'chars
+   shorts 'shorts, ints 'ints, longs 'longs
+   floats 'floats, doubles 'doubles})
+
 (defn- ^Class infer-type [&env x]
   (if-let [^Compiler$LocalBinding lb (get &env x)]
     (when (.hasJavaClass lb)
@@ -17,15 +28,11 @@
     (when-let [v (resolve x)]
       (when (and (var? v) (not (fn? @v)))
         (let [tag (:tag (meta v))]
-          (cond-> tag
-            (string? tag)
-            tag->type))))))
-
-(def ^:private array-type-tags
-  '{booleans "[Z", bytes "[B", chars "[C"
-    shorts "[S", ints "[I", longs "[J"
-    floats "[F", doubles "[D"
-    objects "[Ljava.lang.Object;"})
+          (if-let [tag' (array-fn->array-type tag)]
+            (tag->type (array-type-tags tag'))
+            (cond-> tag
+              (string? tag)
+              tag->type)))))))
 
 (defn tag-fn [type-desc]
   (letfn [(error! []
