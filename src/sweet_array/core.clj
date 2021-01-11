@@ -231,7 +231,7 @@
     (if (.isArray t)
       (with-meta `(c/aclone ~arr) {:tag (type->tag t)})
       (let [form (::form (meta &form))
-            msg (str "Can't apply aset to "
+            msg (str "Can't apply aclone to "
                      (pr-str (second form))
                      ", which is " (.getName t) ", not array")]
         (throw (ex-info msg {:form form}))))
