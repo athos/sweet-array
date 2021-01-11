@@ -42,6 +42,7 @@
     42
     int
     "String"
+    [:double]
     [int int]
     [UnknownClass]))
 
@@ -78,6 +79,10 @@
     (is (= (sa/type [[double]]) (infer arr')))))
 
 (deftest new-test
+  (let [arr (sa/new [byte])]
+    (is (sa/instance? [byte] arr))
+    (is (= (sa/type [byte]) (infer arr)))
+    (is (= 0 (alength arr))))
   (let [arr (sa/new [int] 5)]
     (is (sa/instance? [int] arr))
     (is (= (sa/type [int]) (infer arr)))
@@ -197,6 +202,13 @@
            (alength (aget arr 1))))
     (is (= [0.0 0.5] (seq (aget arr 0))))
     (is (= [1.0 1.5] (seq (aget arr 1)))))
+  (let [arr (sa/into-array [[String]] [["foo" "bar"] ["baz"]])]
+    (is (sa/instance? [[String]] arr))
+    (is (= (sa/type [[String]]) (infer arr)))
+    (is (= 2 (alength arr) (alength (aget arr 0))))
+    (is (= 1 (alength (aget arr 1))))
+    (is (= ["foo" "bar"] (seq (aget arr 0))))
+    (is (= ["baz"] (seq (aget arr 1)))))
   (let [arr (sa/into-array [int] (map inc) (range 3))]
     (is (sa/instance? [int] arr))
     (is (= (sa/type [int]) (infer arr)))
@@ -223,6 +235,9 @@
     (is (= (sa/type [char]) (infer arr)))
     (is (= 6 (alength arr)))
     (is (= [\a \b \c \d \e \f] (seq arr)))))
+
+(def ^ints arr-with-type-hint
+  (sa/new [int] 1))
 
 (def arr-without-type-hint
   (sa/new [[int]] 1 1))
@@ -257,6 +272,7 @@
     (is (= Float/TYPE (infer res3)))
     (is (= 1.0 res3)))
   (is (thrown? Throwable (macroexpand `(sa/aget s 0))))
+  (is (thrown? Throwable (macroexpand `(sa/aget arr-with-type-hint 0 0))))
   (is (re-find #"^Reflection warning"
                (with-out-str
                  (binding [*warn-on-reflection* true
@@ -278,6 +294,7 @@
     (is (= [\d \z] (seq (aget arr 1 0))))
     (is (= [\f] (seq (aget arr 1 1)))))
   (is (thrown? Throwable (macroexpand `(sa/aset s 0 "foo"))))
+  (is (thrown? Throwable (macroexpand `(sa/aset arr-with-type-hint 0 0 42))))
   (is (re-find #"^Reflection warning"
                (with-out-str
                  (binding [*warn-on-reflection* true
