@@ -12,4 +12,7 @@
    {com.cognitect/test-runner
     {:git/url "https://github.com/cognitect-labs/test-runner.git"
      :sha "209b64504cb3bd3b99ecfec7937b358a879f55c1"}}
-   :main-opts ["-m" "cognitect.test-runner"]}}}
+   :main-opts ["-m" "cognitect.test-runner"]}
+  :coverage
+  {:extra-deps {cloverage/cloverage {:mvn/version "1.1.2"}}
+   :main-opts ["-m" "cloverage.coverage" "-p" "src" "-s" "test"]}}}
