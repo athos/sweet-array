@@ -1,0 +1,36 @@
+name: build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Java
+      uses: actions/setup-java@v1
+      with:
+        java-version: '11'
+    - name: Setup Clojure CLI
+      uses: DeLaGuardo/setup-clojure@3.1
+      with:
+        tools-deps: latest
+    - name: Cache deps
+      uses: actions/cache@v2
+      with:
+        path: |
+          .cpcache
+          ~/.m2
+          ~/.gitlibs
+        key: ${{ runner.os }}-${{ hashFiles('deps.edn') }}
+        restore-keys: |
+          ${{ runner.os }}-
+    - name: Install deps
+      run: |
+        clojure -Acheck:test:coverage -P
+    - name: Run check
+      run: clojure -Mcheck
+    - name: Measure test coverage
+      run: clojure -Mtest:coverage
+    - name: Upload coverage report to CodeCov
+      uses: codecov/codecov-action@v1
