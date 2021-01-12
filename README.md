@@ -1,6 +1,7 @@
 # sweet-array
 [![Clojars Project](https://img.shields.io/clojars/v/sweet-array.svg)](https://clojars.org/sweet-array)
 ![build](https://github.com/athos/sweet-array/workflows/build/badge.svg)
+[![codecov](https://codecov.io/gh/athos/sweet-array/branch/main/graph/badge.svg?token=phoLI2vS9n)](https://codecov.io/gh/athos/sweet-array)
 
 Array manipulation library for Clojure with sweet (type) syntax and fewer pitfalls
 
