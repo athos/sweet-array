@@ -1,6 +1,7 @@
 (ns sweet-array.core-test
   (:require [clojure.test :refer [deftest is are]]
-            [sweet-array.core :as sa]))
+            [sweet-array.core :as sa]
+            [type-infer.core :refer [infer]]))
 
 (deftest type-test
   (is (= (type (boolean-array 0))
@@ -54,9 +55,6 @@
   (is (not (sa/instance? [int] (short-array [1 2 3]))))
   (is (not (sa/instance? [[long]] (long-array [1 2 3]))))
   (is (not (sa/instance? [double] (make-array Double/TYPE 0 0)))))
-
-(defmacro infer [x]
-  (#'sa/infer-type &env x))
 
 (deftest cast-test
   (let [arr (make-array Integer/TYPE 0)

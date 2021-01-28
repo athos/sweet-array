@@ -1,7 +1,8 @@
 (ns sweet-array.core
   (:refer-clojure :exclude [aclone aget aset cast instance? into-array type])
-  (:require [clojure.core :as c])
-  (:import [clojure.lang Compiler$LocalBinding RT]
+  (:require [clojure.core :as c]
+            [type-infer.core :as ty])
+  (:import [clojure.lang RT]
            [java.lang.reflect Array]))
 
 (defn- type->tag [^Class type]
@@ -15,24 +16,6 @@
     shorts "[S", ints "[I", longs "[J"
     floats "[F", doubles "[D"
     objects "[Ljava.lang.Object;"})
-
-(def ^:private array-fn->array-type
-  {booleans 'booleans, bytes 'bytes, chars 'chars
-   shorts 'shorts, ints 'ints, longs 'longs
-   floats 'floats, doubles 'doubles})
-
-(defn- ^Class infer-type [&env x]
-  (if-let [^Compiler$LocalBinding lb (get &env x)]
-    (when (.hasJavaClass lb)
-      (.getJavaClass lb))
-    (when-let [v (resolve x)]
-      (when (and (var? v) (not (fn? @v)))
-        (let [tag (:tag (meta v))]
-          (if-let [tag' (array-fn->array-type tag)]
-            (tag->type (array-type-tags tag'))
-            (cond-> tag
-              (string? tag)
-              tag->type)))))))
 
 (defn tag-fn [type-desc]
   (letfn [(error! []
@@ -99,7 +82,7 @@
   (apply expand-to-macro* `aget* &form arr idx more))
 
 (defmacro aget* [arr idx & more]
-  (if-let [t (infer-type &env arr)]
+  (if-let [t (ty/infer-type &env arr)]
     (if (not (.isArray t))
       (let [form (::form (meta &form))
             msg (str "Can't apply aget to "
@@ -143,7 +126,7 @@
   (apply expand-to-macro* `aset* &form arr idx idxv))
 
 (defmacro aset* [arr idx & idxv]
-  (if-let [t (infer-type &env arr)]
+  (if-let [t (ty/infer-type &env arr)]
     (if (not (.isArray t))
       (let [form (::form (meta &form))
             msg (str "Can't apply aset to "
@@ -234,7 +217,7 @@
   (expand-to-macro* `aclone* &form arr))
 
 (defmacro aclone* [arr]
-  (if-let [t (infer-type &env arr)]
+  (if-let [t (ty/infer-type &env arr)]
     (if (.isArray t)
       (with-meta `(c/aclone ~arr) {:tag (type->tag t)})
       (let [form (::form (meta &form))
