@@ -82,7 +82,7 @@
   (apply expand-to-macro* `aget* &form arr idx more))
 
 (defmacro aget* [arr idx & more]
-  (if-let [t (ty/infer-type &env arr)]
+  (if-let [^Class t (ty/infer-type &env arr)]
     (if (not (.isArray t))
       (let [form (::form (meta &form))
             msg (str "Can't apply aget to "
@@ -126,7 +126,7 @@
   (apply expand-to-macro* `aset* &form arr idx idxv))
 
 (defmacro aset* [arr idx & idxv]
-  (if-let [t (ty/infer-type &env arr)]
+  (if-let [^Class t (ty/infer-type &env arr)]
     (if (not (.isArray t))
       (let [form (::form (meta &form))
             msg (str "Can't apply aset to "
@@ -217,7 +217,7 @@
   (expand-to-macro* `aclone* &form arr))
 
 (defmacro aclone* [arr]
-  (if-let [t (ty/infer-type &env arr)]
+  (if-let [^Class t (ty/infer-type &env arr)]
     (if (.isArray t)
       (with-meta `(c/aclone ~arr) {:tag (type->tag t)})
       (let [form (::form (meta &form))
