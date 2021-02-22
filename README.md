@@ -113,6 +113,51 @@ Add the following to your project dependencies:
 
 #### `(instance? <array type> expr)`
 
+## Type syntax
+
+`power-dot` adopts what we call *type descriptors* to denote array types
+throughout the library. Following is the syntax definition of `power-dot`'s 
+type descriptors:
+
+```
+    <type descriptor> ::= '[' <component type> ']'
+                        | <array type alias>
+
+     <component type> ::= <primitive type name>
+                        | <reference type name>
+                        | <type descriptor>
+
+<primitive type name> ::= 'boolean'
+                        | 'byte'
+                        | 'char'
+                        | 'short'
+                        | 'int'
+                        | 'long'
+                        | 'float'
+                        | 'double'
+
+<reference type name> ::= any valid class or interface name
+
+   <array type alias> ::= 'booleans'
+                        | 'bytes'
+                        | 'shorts'
+                        | 'ints'
+                        | 'longs'
+                        | 'floats'
+                        | 'doubles'
+                        | 'objects'
+```
+
+A type descriptor `[T]` denotes an array whose component type is `T`.
+The component type itself can be an array type. For example, `[[T]]` denotes
+two-dimensional array type of `T`, `[[[T]]]` denotes three-dimensional array type
+of `T` and so on.
+
+Array type aliases, such as `ints` and `doubles`, can also be used as type
+descriptors. They are completely interchangeable with the corresponding type 
+descriptor notation: `ints` is equivalent to `[int]` and `[doubles]` is equivalent
+to `[[double]]`, for instance.
+
 ## Benchmarks
 
 ## License
