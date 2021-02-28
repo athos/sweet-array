@@ -104,13 +104,14 @@ Add the following to your project dependencies:
 
 ### Array creation
 
-#### `(new <array type> n1 n2 ... nk)`
+#### `(new [T] n1 n2 ... nk)`
 
-#### `(new <array type> [expr ...])`
 
-#### `(into-array <array type> coll)`
+#### `(new [T] [expr ...])`
 
-#### `(into-array <array type> xform coll)`
+#### `(into-array [T] coll)`
+
+#### `(into-array [T] xform coll)`
 
 ### Array indexing
 
@@ -120,9 +121,9 @@ Add the following to your project dependencies:
 
 ### Type-related utilities
 
-#### `(type <array type>)`
+#### `(type [T])`
 
-#### `(instance? <array type> expr)`
+#### `(instance? [T] expr)`
 
 ## Type syntax
 
