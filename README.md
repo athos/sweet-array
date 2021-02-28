@@ -141,7 +141,37 @@ In general, `(sa/new [[T]] n1 n2)` creates a 2-d array of the type `T` with the 
 of `n1 x n2` and `(sa/new [[[T]]] n1 n2 n3)` creates a 3-d array of the type `T` 
 with the size of `n1 x n2 x n3`, and so on.
 
-#### `(new [T] [expr ...])`
+#### `(new [T] [elem1 elem2 ... elemk])`
+
+The `new` macro provides another syntax to create an array enumerating 
+the initial elements. `(sa/new [T] [elem1 elem2 ... elemk])` creates an array
+initialized with the elements `elem1`, `elem2`, ..., `elemk`:
+
+```clojure
+(def arr (sa/new [int] [1 2 3]))
+(alength arr) ;=> 3
+[(aget arr 0) (aget arr 1) (aget arr 2)] ;=> [1 2 3]
+```
+
+This form can be used to create arbitrarily nested arrays:
+
+```clojure
+;; 2-d double array
+(sa/new [[double]] [[1.0 2.0] [3.0 4.0]])
+;; 3-d boolean array
+(sa/new [[[boolean]]]
+        [[[true false] [false true]]
+         [[false true] [true false]]]
+```
+
+When initializing multi-dimensional arrays, the init expression for each element
+may itself be an array or an expression that generates an array:
+
+```clojure
+(def xs (sa/new [double] [1.0 2.0]))
+(def ys (sa/new [double] [3.0 4.0]))
+(sa/new [[double]] [xs ys])
+```
 
 #### `(into-array [T] coll)`
 
