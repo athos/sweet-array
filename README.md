@@ -106,6 +106,40 @@ Add the following to your project dependencies:
 
 #### `(new [T] n1 n2 ... nk)`
 
+The simplest way to create an array using this library is to use
+the `sweet-array.core/new` macro. The `new` macro is a generic array constructor
+that can be used to create both primitive and reference type arrays:
+
+```clojure
+(require '[sweet-array.core :as sa])
+
+(def xs (sa/new [int] 3))
+(class xs) ;=> [I
+(alength xs) ;=> 3
+
+(def ys (sa/new [String] 5))
+(class ys) ;=> [Ljava.lang.String;
+(alength ys) ;=> 5
+```
+
+The first argument of the `new` macro is what we call a *type descriptor*.
+See the [Type syntax](#type-syntax) section for more details, but roughly speaking,
+a type descriptor `[T]` denotes an array type whose component type is `T`
+(e.g. `[int]` denotes int array type and `[String]` denotes String array type).
+
+The `new` macro can also be used to create multi-dimensional arrays.
+The following example creates a two-dimensional int array:
+
+```clojure
+(def arr (sa/new [[int]] 2 3))
+(class arr) ;=> [[I
+(alength arr) ;=> 2
+(alength (aget arr 0)) ;=> 3
+```
+
+In general, `(sa/new [[T]] n1 n2)` creates a 2-d array of the type `T` with the size
+of `n1 x n2` and `(sa/new [[[T]]] n1 n2 n3)` creates a 3-d array of the type `T` 
+with the size of `n1 x n2 x n3`, and so on.
 
 #### `(new [T] [expr ...])`
 
