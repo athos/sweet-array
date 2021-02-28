@@ -175,7 +175,53 @@ may itself be an array or an expression that generates an array:
 
 #### `(into-array [T] coll)`
 
+Another way to create an array in the library is the `sweet-array.core/into-array`
+macro. 
+
+```clojure
+(require '[sweet-array.core :as sa])
+
+(def arr (sa/into-array [int] (range 10)))
+(class arr) ;=> [I
+(alength arr) ;=> 10
+```
+
+Like `clojure.core/into-array`, `sa/into-array` converts an existing collection
+(Seqable) into an array. Unlike `clojure.core/into-array`, the resulting array
+type is specified with the [type descriptor](#type-syntax) as the first argument.
+
+`sa/into-array` can also be used to create multi-dimensional arrays:
+
+```clojure
+(def arr' (sa/into-array [[int]] (partition 2 (range 10))))
+(class arr') ;=> [[I
+[(aget arr' 0 0) (aget arr' 0 1) (aget arr' 1 0) (aget arr' 1 1)]
+;=> [0 1 2 3]
+```
+
 #### `(into-array [T] xform coll)`
+
+The `sa/into-array` macro optionally takes a [transducer](https://clojure.org/reference/transducers).
+This form of `sa/into-array` is inspired by and therefore analogous to
+`(into to xform from)`. That is, the transducer `xform` as the second argument
+will be applied while converting the collection into an array:
+
+```clojure
+(def arr (sa/into-array [int] (filter even?) (range 10)))
+(alength arr) ;=> 5
+[(aget arr 0) (aget arr 1) (aget arr 2)] ;=> [0 2 4]
+```
+
+This can be useful to do transformations that increase or decrease the dimension
+of an array:
+
+```clojure
+;; 1-d to 2-d conversion
+(sa/into-array [[int]] (partition-all 2) (sa/new [int] [1 2 3 4]))
+
+;; 2-d to 1-d conversion
+(sa/into-array [double] cat (sa/new [[double]] [[1.0 2.0] [3.0 4.0]]))
+```
 
 ### Array indexing
 
