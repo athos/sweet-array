@@ -153,6 +153,16 @@ initialized with the elements `elem1`, `elem2`, ..., `elemk`:
 [(aget arr 0) (aget arr 1) (aget arr 2)] ;=> [1 2 3]
 ```
 
+In general, `(sa/new [T] [elem1 elem2 ... elemk])` is equivalent to:
+
+```clojure
+(doto (sa/new [T] k)
+  (aset 0 elem1)
+  (aset 1 elem2)
+  ...
+  (aset (- k 1) elemk))
+```
+
 This form can be used to create arbitrarily nested arrays:
 
 ```clojure
