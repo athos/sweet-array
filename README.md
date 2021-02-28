@@ -5,6 +5,17 @@
 
 Array manipulation library for Clojure with sweet (type) syntax and fewer pitfalls
 
+## Table of Contents
+
+- [Rationale](#rationale)
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Array creation](#array-creation)
+  - [Array indexing](#array-indexing)
+  - [Type-related utilities](#type-related-utilities)
+- [Type syntax](#type-syntax)
+- [Benchmarks](#benchmarks)
+
 ## Rationale
 
 Using Clojure's array functions, you can write code like the following:
