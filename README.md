@@ -138,8 +138,8 @@ The following example creates a two-dimensional int array:
 ```
 
 In general, `(sa/new [[T]] n1 n2)` creates a 2-d array of the type `T` with the size
-of `n1 x n2` and `(sa/new [[[T]]] n1 n2 n3)` creates a 3-d array of the type `T` 
-with the size of `n1 x n2 x n3`, and so on.
+of `n1`x`n2` and `(sa/new [[[T]]] n1 n2 n3)` creates a 3-d array of the type `T` 
+with the size of `n1`x`n2`x`n3`, and so on.
 
 #### `(new [T] [elem1 elem2 ... elemk])`
 
@@ -163,7 +163,7 @@ In general, `(sa/new [T] [elem1 elem2 ... elemk])` is equivalent to:
   (aset (- k 1) elemk))
 ```
 
-This form can be used to create arbitrarily nested arrays:
+This form can be used to initialize arbitrarily nested arrays:
 
 ```clojure
 ;; 2-d double array
@@ -185,8 +185,7 @@ may itself be an array or an expression that generates an array:
 
 #### `(into-array [T] coll)`
 
-Another way to create an array in the library is the `sweet-array.core/into-array`
-macro. 
+Another way to create an array is the `sweet-array.core/into-array` macro:
 
 ```clojure
 (require '[sweet-array.core :as sa])
@@ -212,9 +211,9 @@ type is specified with the [type descriptor](#type-syntax) as the first argument
 #### `(into-array [T] xform coll)`
 
 The `sa/into-array` macro optionally takes a [transducer](https://clojure.org/reference/transducers).
-This form of `sa/into-array` is inspired by and therefore analogous to
-`(into to xform from)`. That is, the transducer `xform` as the second argument
-will be applied while converting the collection into an array:
+This form is inspired by and therefore analogous to `(into to xform from)`.
+That is, the transducer `xform` as the second argument will be applied
+while converting the collection into an array:
 
 ```clojure
 (def arr (sa/into-array [int] (filter even?) (range 10)))
@@ -222,8 +221,8 @@ will be applied while converting the collection into an array:
 [(aget arr 0) (aget arr 1) (aget arr 2)] ;=> [0 2 4]
 ```
 
-This can be useful to do transformations that increase or decrease the dimension
-of an array:
+This is especially useful to do transformations that increase or decrease
+the dimension of an array:
 
 ```clojure
 ;; 1-d to 2-d conversion
@@ -286,7 +285,7 @@ two-dimensional array type of `T`, `[[[T]]]` denotes three-dimensional array typ
 of `T` and so on.
 
 Array type aliases, such as `ints` and `doubles`, can also be used as type
-descriptors. They are completely interchangeable with the corresponding type 
+descriptors. They are completely interchangeable with their corresponding type 
 descriptor notation: `ints` is equivalent to `[int]` and `[doubles]` is equivalent
 to `[[double]]`, for instance.
 
