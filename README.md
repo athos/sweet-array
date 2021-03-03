@@ -235,8 +235,44 @@ the dimension of an array:
 ### Array indexing
 
 #### `(aget array idx1 idx2 ... idxk)`
-
 #### `(aset array idx1 idx2 ... idxk val)`
+
+`sweet-array` provides its own version of `aget` / `aset` for indexing arrays.
+They work almost the same way as `aget` / `aset` defined in `clojure.core`:
+
+```clojure
+(require '[sweet-array.core :as sa])
+
+(def ^"[I" arr (sa/new [int] [1 2 3 4 5]))
+
+(sa/aget arr 2) ;=> 3
+(sa/aset arr 2 42)
+(sa/aget arr 2) ;=> 42
+```
+
+Of course, they can also be used for multi-dimensional arrays as 
+`c.c/aget` & `aset`:
+
+```clojure
+(def ^"[D" arr (sa/new [double] [[1.0 2.0] [3.0 4.0]]))
+
+(sa/aget arr 1 1) ;=> 4.0
+(sa/aset arr 1 1 42)
+(sa/aget arr 1 1) ;=> 42
+```
+
+The difference is that `sa/aget` and `sa/aset` infer the static type of their
+first argument and utilize it in various ways as follows.
+In a nutshell, they are safer and faster:
+
+- Static type checking for the array argument
+  - If the type inference fails, they will fall back to `c.c/aget` & `aset` and emit an reflection warning
+  - If the type inference succeeds but the inferred type of the first argument is not an array type, then they will raise a compile-time error
+  - If more indices are passed to them than the number of dimensions of the inferred array type, then they will raise a compile-time error
+- Faster access to multi-dimensional arrays by automatic type hint insertion
+  - `sa/aget` & `sa/aset` know that indexing `[T]` once results in the type `T`, and automatically insert type hints to the expanded form if necessary
+  - This reduces cases where explicit type hinting is required
+
 
 ### Type-related utilities
 
