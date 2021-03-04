@@ -262,16 +262,69 @@ Of course, they can also be used for multi-dimensional arrays as
 ```
 
 The difference is that `sa/aget` and `sa/aset` infer the static type of their
-first argument and utilize it in various ways as follows.
+first argument and utilize it for several purposes as follows.
 In a nutshell, they are safer and faster:
 
 - Static type checking for the array argument
   - If the type inference fails, they will fall back to `c.c/aget` & `aset` and emit an reflection warning
+    ```clojure
+    (set! *warn-on-reflection* true)
+    
+    (fn [arr] (sa/aget arr 0))
+    ;; Reflection warning, ... - call to static method aget on clojure.lang.RT can't be resolved (argument types: unknown, int).
+    
+    (fn [arr] (sa/aget arr 0 0))
+    ;; Reflection warning, ... - type of first argument for aget cannot be inferred
+    ```
   - If the type inference succeeds but the inferred type of the first argument is not an array type, then they will raise a compile-time error
+    ```clojure
+    (sa/aget "I'm a string" 0)
+    ;; Syntax error macroexpanding sweet-array.core/aget* at ...
+    ;; Can't apply aget to "I'm a string", which is java.lang.String, not array
+    ```
   - If more indices are passed to them than the number of dimensions of the inferred array type, then they will raise a compile-time error
+    ```clojure
+    (sa/aget (sa/new [int] 3) 0 1 2)
+    ;; Syntax error macroexpanding sweet-array.core/aget* at ...
+    ;; Can't apply aget to (sa/new [int] 3) with more than 1 index(es)
+    ```
 - Faster access to multi-dimensional arrays by automatic type hint insertion
-  - `sa/aget` & `sa/aset` know that indexing `[T]` once results in the type `T`, and automatically insert type hints to the expanded form if necessary
-  - This reduces cases where explicit type hinting is required
+  - `sa/aget` & `sa/aset` know that indexing `[T]` once results in the type `T`, and automatically insert obvious type hints to the expanded form, which reduces cases where one has to add type hints manually
+    ```clojure
+    (require '[criterium.core :as cr])
+    
+    (def ^"[[I" arr
+      (sa/into-array [[int]] (map (fn [i] (map (fn [j] (* i j)) (range 10))) (range 10)))
+      
+    (cr/quick-bench (dotimes [i 10] (dotimes [j 10] (aget arr i j))))
+    ;; Evaluation count : 792 in 6 samples of 132 calls.
+    ;;              Execution time mean : 910.441562 µs
+    ;;     Execution time std-deviation : 170.924552 µs
+    ;;    Execution time lower quantile : 758.037129 µs ( 2.5%)
+    ;;    Execution time upper quantile : 1.151744 ms (97.5%)
+    ;;                    Overhead used : 8.143474 ns
+    
+    ;; The above result is way too slow due to unrecognizable reflection
+    ;; To avoid this slowness, you'll need to add type hints yourself
+    
+    (cr/quick-bench (dotimes [i 10] (dotimes [j 10] (aget ^ints (aget arr i) j))))
+    ;; Evaluation count : 4122636 in 6 samples of 687106 calls.
+    ;;              Execution time mean : 139.098679 ns
+    ;;     Execution time std-deviation : 2.387043 ns
+    ;;    Execution time lower quantile : 136.235737 ns ( 2.5%)
+    ;;    Execution time upper quantile : 142.183007 ns (97.5%)
+    ;;                    Overhead used : 8.143474 ns
+    
+    ;; Using `sa/aget`, you can simply write as follows:
+    
+    (cr/quick-bench (dotimes [i 10] (dotimes [j 10] (sa/aget arr i j))))
+    ;; Evaluation count : 5000448 in 6 samples of 833408 calls.
+    ;;              Execution time mean : 113.195074 ns
+    ;;     Execution time std-deviation : 4.641354 ns
+    ;;    Execution time lower quantile : 108.656324 ns ( 2.5%)
+    ;;    Execution time upper quantile : 119.427431 ns (97.5%)
+    ;;                    Overhead used : 8.143474 ns
+    ```
 
 
 ### Type-related utilities
