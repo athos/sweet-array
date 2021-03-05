@@ -329,9 +329,42 @@ In a nutshell, they are safer and faster:
 
 ### Type-related utilities
 
+`sweet-array` also provides several utilities that are useful for dealing with
+array types.
+
 #### `(type [T])`
 
+The `sweet-array.core/type` macro is convenient to reify an array type represented
+with a [type descriptor](#type-syntax):
+
+```clojure
+(require '[sweet-array.core :as sa])
+
+(sa/type [int]) ;=> [I
+(sa/type [String]) ;=> [Ljava.lang.String;
+(sa/type [[double]]) ;=> [[D
+```
+
+Each form is more concise and straightforward than the corresponding idiomatic code:
+
+```clojure
+(class (int-array 0)) ;=> [I
+(class (make-array String 0)) ;=> [Ljava.lang.String;
+(class (make-array Double/TYPE 0)) ;=> [[D
+```
+
 #### `(instance? [T] expr)`
+
+The `sweet-array.core/instance?` macro is a predicate to check if a given value is
+of the specified array type:
+
+```clojure
+(sa/instance? [int] (sa/new [int] [1 2 3])) ;=> true
+(sa/instance? [Object] (sa/new [int] [1 2 3])) ;=> false
+(sa/instance? [String] "foo") ;=> false
+```
+
+`(sa/instance? [T] expr)` is just syntactic sugar for `(instance? (sa/type [T]) expr)`.
 
 ## Type syntax
 
