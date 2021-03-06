@@ -366,6 +366,47 @@ of the specified array type:
 
 `(sa/instance? [T] expr)` is just syntactic sugar for `(instance? (sa/type [T]) expr)`.
 
+#### `(cast [T] expr)`
+
+The `sweet-array.core/cast` macro is for coercing an expression to the specified
+array type. It's useful for resolving reflection warnings when some expression
+cannot be inferred:
+
+```clojure
+(defn make-array [n] (sa/new [int] n))
+
+(set! *warn-on-reflection* true)
+
+(sa/aget (make-array 3) 0)
+;; Reflection warning, ... - call to static method aget on clojure.lang.RT can't be resolved (argument types: unknown, int).
+;=> 0
+
+(sa/aget (sa/cast [int] (make-array 3)) 0)
+;=> 0
+```
+
+Note that `sa/cast` only has the compile-time effect, and does nothing at runtime.
+
+#### `#sweet/tag [T]`
+
+For those who want to radically eliminate cryptic array type hints (e.g. `^"[I"`
+and `^"[Ljava.lang.String;"`) from your code, `sweet-array` provides reader syntax
+that can be used as a replacement for that.
+
+By prefixing `#sweet/tag`, you can write a type hints with a type descriptor: 
+
+```clojure
+(defn ^#sweet/tag [String] select-randomly [^#sweet/tag [[String]] arr]
+  (sa/aget arr (rand-int (alength arr))))
+```
+
+This code compiles without any reflection warning, just as with:
+
+```clojure
+(defn ^"[Ljava.lang.String;" select-randomly [^"[[Ljava.lang.String;" arr]
+  (sa/aget arr (rand-int (alength arr))))
+```
+
 ## Type syntax
 
 `power-dot` adopts what we call *type descriptors* to denote array types
