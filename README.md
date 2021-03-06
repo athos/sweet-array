@@ -350,7 +350,7 @@ Each form is more concise and straightforward than the corresponding idiomatic c
 ```clojure
 (class (int-array 0)) ;=> [I
 (class (make-array String 0)) ;=> [Ljava.lang.String;
-(class (make-array Double/TYPE 0)) ;=> [[D
+(class (make-array Double/TYPE 0 0)) ;=> [[D
 ```
 
 #### `(instance? [T] expr)`
