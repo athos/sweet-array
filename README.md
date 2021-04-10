@@ -14,7 +14,6 @@ Array manipulation library for Clojure with "sweet" type syntax and fewer pitfal
   - [Array indexing](#array-indexing)
   - [Type-related utilities](#type-related-utilities)
 - [Type syntax](#type-syntax)
-- [Benchmarks](#benchmarks)
 
 ## Rationale
 
@@ -451,8 +450,6 @@ Array type aliases, such as `ints` and `doubles`, can also be used as type
 descriptors. They are completely interchangeable with their corresponding type 
 descriptor notation: `ints` is equivalent to `[int]` and `[doubles]` is equivalent
 to `[[double]]`, for instance.
-
-## Benchmarks
 
 ## License
 
