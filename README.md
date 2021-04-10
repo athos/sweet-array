@@ -59,7 +59,7 @@ To get rid of those problematic reflections, you need to add type hints here and
 Knowing why and where to put type hints requires an extensive understanding of
 how the Clojure compiler works and how array functions are implemented.
 But roughly speaking, Clojure's array functions are not very good at handling
-multi-demensional arrays (This issue has been reported as
+multi-dimensional arrays (This issue has been reported as
 [CLJ-1289](https://clojure.atlassian.net/browse/CLJ-1289)).
 
 Using `sweet-array`, you can write code that is almost as concise as how you would
