@@ -137,12 +137,12 @@ The following example creates a two-dimensional int array:
 ```
 
 In general, `(sa/new [[T]] n1 n2)` creates a 2-d array of the type `T` with the size
-of `n1`x`n2` and `(sa/new [[[T]]] n1 n2 n3)` creates a 3-d array of the type `T` 
+of `n1`x`n2` and `(sa/new [[[T]]] n1 n2 n3)` creates a 3-d array of the type `T`
 with the size of `n1`x`n2`x`n3`, and so on.
 
 #### `(new [T] [elem1 elem2 ... elemk])`
 
-The `new` macro provides another syntax to create an array enumerating 
+The `new` macro provides another syntax to create an array enumerating
 the initial elements. `(sa/new [T] [elem1 elem2 ... elemk])` creates an array
 initialized with the elements `elem1`, `elem2`, ..., `elemk`:
 
@@ -249,7 +249,7 @@ They work almost the same way as `aget` / `aset` defined in `clojure.core`:
 (sa/aget arr 2) ;=> 42
 ```
 
-Of course, they can also be used for multi-dimensional arrays as 
+Of course, they can also be used for multi-dimensional arrays as
 `c.c/aget` & `aset`:
 
 ```clojure
@@ -392,7 +392,7 @@ For those who want to radically eliminate cryptic array type hints (e.g. `^"[I"`
 and `^"[Ljava.lang.String;"`) from your code, `sweet-array` provides reader syntax
 that can be used as a replacement for that.
 
-By prefixing `#sweet/tag`, you can write a type hints with a type descriptor: 
+By prefixing `#sweet/tag`, you can write a type hints with a type descriptor:
 
 ```clojure
 (defn ^#sweet/tag [String] select-randomly [^#sweet/tag [[String]] arr]
@@ -409,7 +409,7 @@ This code compiles without any reflection warning, just as with:
 ## Type syntax
 
 `power-dot` adopts what we call *type descriptors* to denote array types
-throughout the library. Following is the syntax definition of `power-dot`'s 
+throughout the library. Following is the syntax definition of `power-dot`'s
 type descriptors:
 
 ```
@@ -447,7 +447,7 @@ two-dimensional array type of `T`, `[[[T]]]` denotes three-dimensional array typ
 of `T` and so on.
 
 Array type aliases, such as `ints` and `doubles`, can also be used as type
-descriptors. They are completely interchangeable with their corresponding type 
+descriptors. They are completely interchangeable with their corresponding type
 descriptor notation: `ints` is equivalent to `[int]` and `[doubles]` is equivalent
 to `[[double]]`, for instance.
 
