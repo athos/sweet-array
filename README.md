@@ -408,8 +408,8 @@ This code compiles without any reflection warning, just as with:
 
 ## Type syntax
 
-`power-dot` adopts what we call *type descriptors* to denote array types
-throughout the library. Following is the syntax definition of `power-dot`'s
+`sweet-array` adopts what we call *type descriptors* to denote array types
+throughout the library. Following is the syntax definition of `sweet-array`'s
 type descriptors:
 
 ```
