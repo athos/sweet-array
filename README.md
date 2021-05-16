@@ -121,9 +121,9 @@ that can be used to create both primitive and reference type arrays:
 (alength ys) ;=> 5
 ```
 
-The first argument of the `new` macro is what we call a *type descriptor*.
+The first argument of the `new` macro is what we call an *array type descriptor*.
 See the [Type syntax](#type-syntax) section for more details, but roughly speaking,
-a type descriptor `[T]` denotes an array type whose component type is `T`
+an array type descriptor `[T]` denotes an array type whose component type is `T`
 (e.g. `[int]` denotes int array type and `[String]` denotes String array type).
 
 The `new` macro can also be used to create multi-dimensional arrays.
@@ -196,7 +196,7 @@ Another way to create an array is the `sweet-array.core/into-array` macro:
 
 Like `clojure.core/into-array`, `sa/into-array` converts an existing collection
 (Seqable) into an array. Unlike `clojure.core/into-array`, the resulting array
-type is specified with the [type descriptor](#type-syntax) as the first argument.
+type is specified with the [array type descriptor](#type-syntax) as the first argument.
 
 `sa/into-array` can also be used to create multi-dimensional arrays:
 
@@ -334,7 +334,7 @@ array types.
 #### `(type [T])`
 
 The `sweet-array.core/type` macro is convenient to reify an array type represented
-with a [type descriptor](#type-syntax):
+with an [array type descriptor](#type-syntax):
 
 ```clojure
 (require '[sweet-array.core :as sa])
@@ -392,7 +392,7 @@ For those who want to radically eliminate cryptic array type hints (e.g. `^"[I"`
 and `^"[Ljava.lang.String;"`) from your code, `sweet-array` provides reader syntax
 that can be used as a replacement for that.
 
-By prefixing `#sweet/tag`, you can write a type hints with a type descriptor:
+By prefixing `#sweet/tag`, you can write a type hints with an array type descriptor:
 
 ```clojure
 (defn ^#sweet/tag [String] select-randomly [^#sweet/tag [[String]] arr]
@@ -408,17 +408,17 @@ This code compiles without any reflection warning, just as with:
 
 ## Type syntax
 
-`sweet-array` adopts what we call *type descriptors* to denote array types
+`sweet-array` adopts what we call *array type descriptors* to denote array types
 throughout the library. Following is the syntax definition of `sweet-array`'s
-type descriptors:
+array type descriptors:
 
 ```
-    <type descriptor> ::= '[' <component type> ']'
+    <array type descriptor> ::= '[' <component type> ']'
                         | <array type alias>
 
      <component type> ::= <primitive type name>
                         | <reference type name>
-                        | <type descriptor>
+                        | <array type descriptor>
 
 <primitive type name> ::= 'boolean'
                         | 'byte'
@@ -441,13 +441,13 @@ type descriptors:
                         | 'objects'
 ```
 
-A type descriptor `[T]` denotes an array whose component type is `T`.
+An array type descriptor `[T]` denotes an array whose component type is `T`.
 The component type itself can be an array type. For example, `[[T]]` denotes
 two-dimensional array type of `T`, `[[[T]]]` denotes three-dimensional array type
 of `T` and so on.
 
-Array type aliases, such as `ints` and `doubles`, can also be used as type
-descriptors. They are completely interchangeable with their corresponding type
+Array type aliases, such as `ints` and `doubles`, can also be used as array type
+descriptors. They are completely interchangeable with their corresponding array type
 descriptor notation: `ints` is equivalent to `[int]` and `[doubles]` is equivalent
 to `[[double]]`, for instance.
 
