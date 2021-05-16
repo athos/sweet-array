@@ -268,10 +268,10 @@ In a nutshell, they are safer and faster:
   - If the type inference fails, they will fall back to `c.c/aget` & `aset` and emit an reflection warning
     ```clojure
     (set! *warn-on-reflection* true)
-    
+
     (fn [arr] (sa/aget arr 0))
     ;; Reflection warning, ... - call to static method aget on clojure.lang.RT can't be resolved (argument types: unknown, int).
-    
+
     (fn [arr] (sa/aget arr 0 0))
     ;; Reflection warning, ... - type of first argument for aget cannot be inferred
     ```
@@ -291,10 +291,10 @@ In a nutshell, they are safer and faster:
   - `sa/aget` & `sa/aset` know that indexing `[T]` once results in the type `T`, and automatically insert obvious type hints to the expanded form, which reduces cases where one has to add type hints manually
     ```clojure
     (require '[criterium.core :as cr])
-    
+
     (def ^"[[I" arr
       (sa/into-array [[int]] (map (fn [i] (map (fn [j] (* i j)) (range 10))) (range 10)))
-      
+
     (cr/quick-bench (dotimes [i 10] (dotimes [j 10] (aget arr i j))))
     ;; Evaluation count : 792 in 6 samples of 132 calls.
     ;;              Execution time mean : 910.441562 µs
@@ -302,10 +302,10 @@ In a nutshell, they are safer and faster:
     ;;    Execution time lower quantile : 758.037129 µs ( 2.5%)
     ;;    Execution time upper quantile : 1.151744 ms (97.5%)
     ;;                    Overhead used : 8.143474 ns
-    
+
     ;; The above result is way too slow due to unrecognizable reflection
     ;; To avoid this slowness, you'll need to add type hints yourself
-    
+
     (cr/quick-bench (dotimes [i 10] (dotimes [j 10] (aget ^ints (aget arr i) j))))
     ;; Evaluation count : 4122636 in 6 samples of 687106 calls.
     ;;              Execution time mean : 139.098679 ns
@@ -313,9 +313,9 @@ In a nutshell, they are safer and faster:
     ;;    Execution time lower quantile : 136.235737 ns ( 2.5%)
     ;;    Execution time upper quantile : 142.183007 ns (97.5%)
     ;;                    Overhead used : 8.143474 ns
-    
+
     ;; Using `sa/aget`, you can simply write as follows:
-    
+
     (cr/quick-bench (dotimes [i 10] (dotimes [j 10] (sa/aget arr i j))))
     ;; Evaluation count : 5000448 in 6 samples of 833408 calls.
     ;;              Execution time mean : 113.195074 ns
