@@ -86,7 +86,7 @@ write it straightforwardly, while it runs as fast as the optimized one shown abo
 ```
 
 `sweet-array` leverages the static types inferred by the Clojure compiler
-to inserts necessary type hints implicitly, so you don't have to add
+to insert necessary type hints implicitly, so you don't have to add
 type hints yourself in most cases.
 
 Also, `sweet-array` adopts "sweet" type syntax (e.g. `[[double]]` and `[String]`),
@@ -107,7 +107,7 @@ Add the following to your project dependencies:
 
 The simplest way to create an array using this library is to use
 the `sweet-array.core/new` macro. The `new` macro is a generic array constructor
-that can be used to create both primitive and reference type arrays:
+which can be used to create both primitive and reference type arrays:
 
 ```clojure
 (require '[sweet-array.core :as sa])
@@ -184,7 +184,7 @@ may itself be an array or an expression that generates an array:
 
 #### `(into-array [T] coll)`
 
-Another way to create an array is the `sweet-array.core/into-array` macro:
+Another way to create an array is to use the `sweet-array.core/into-array` macro:
 
 ```clojure
 (require '[sweet-array.core :as sa])
@@ -390,7 +390,7 @@ Note that `sa/cast` only has the compile-time effect, and does nothing at runtim
 
 For those who want to radically eliminate cryptic array type hints (e.g. `^"[I"`
 and `^"[Ljava.lang.String;"`) from your code, `sweet-array` provides reader syntax
-that can be used as a replacement for that.
+that can be used as a replacement for them.
 
 By prefixing `#sweet/tag`, you can write a type hints with an array type descriptor:
 
@@ -442,14 +442,14 @@ array type descriptors:
 ```
 
 An array type descriptor `[T]` denotes an array whose component type is `T`.
-The component type itself can be an array type. For example, `[[T]]` denotes
+The component type itself may be an array type. For instance, `[[T]]` denotes
 two-dimensional array type of `T`, `[[[T]]]` denotes three-dimensional array type
 of `T` and so on.
 
-Array type aliases, such as `ints` and `doubles`, can also be used as array type
+Array type aliases, such as `ints` and `doubles`, may also be used as array type
 descriptors. They are completely interchangeable with their corresponding array type
 descriptor notation: `ints` is equivalent to `[int]` and `[doubles]` is equivalent
-to `[[double]]`, for instance.
+to `[[double]]`, and so on.
 
 ## License
 
