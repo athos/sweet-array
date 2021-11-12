@@ -194,10 +194,10 @@
   (let [t (type-fn type-desc)]
     (cond (empty? args)
           `(sweet-array.core/new ~type-desc 0)
-          
+
           (vector? (first args))
           (expand-inits t (first args))
-          
+
           :else
           (loop [t' t args' args n 0]
             (if (seq args')
