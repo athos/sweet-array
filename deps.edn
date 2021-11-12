@@ -3,17 +3,16 @@
  :aliases
  {:check
   {:extra-deps
-   {athos/clj-check
-    {:git/url "https://github.com/athos/clj-check.git"
-     :sha "da6363a38b06d9b84976ed330a9544b69d3c4dee"}}
+   {io.github.athos/clj-check
+    {:git/sha "0ca84df1357d71429243b99908303f45a934654c"}}
    :main-opts ["-m" "clj-check.check"]}
   :test
   {:extra-paths ["test"]
    :extra-deps
-   {com.cognitect/test-runner
-    {:git/url "https://github.com/cognitect-labs/test-runner.git"
-     :sha "209b64504cb3bd3b99ecfec7937b358a879f55c1"}}
-   :main-opts ["-m" "cognitect.test-runner"]}
+   {io.github.cognitect-labs/test-runner
+    {:git/tag "v0.5.0" :git/sha "b3fd0d2"}}
+   :main-opts ["-m" "cognitect.test-runner"]
+   :exec-fn cognitect.test-runner.api/test}
   :coverage
   {:extra-deps {cloverage/cloverage {:mvn/version "1.1.2"}}
    :main-opts ["-m" "cloverage.coverage" "-p" "src" "-s" "test" "--codecov"]}}}

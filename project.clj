@@ -5,4 +5,4 @@
             :url "https://www.eclipse.org/legal/epl-2.0/"}
   :dependencies [[type-infer "0.1.1"]]
   :repl-options {:init-ns sweet-array.core}
-  :profiles {:provided {:dependencies [[org.clojure/clojure "1.10.2"]]}})
+  :profiles {:provided {:dependencies [[org.clojure/clojure "1.10.3"]]}})
