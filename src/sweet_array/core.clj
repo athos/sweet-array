@@ -157,7 +157,7 @@
                 *file* line column)))
       `(c/aset ~arr ~idx ~@idxv))))
 
-(def array-ctor-fns
+(def ^:private array-ctor-fns
   {Boolean/TYPE `boolean-array
    Byte/TYPE `byte-array
    Character/TYPE `char-array
