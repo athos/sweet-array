@@ -3,7 +3,7 @@
 ![build](https://github.com/athos/sweet-array/workflows/build/badge.svg)
 [![codecov](https://codecov.io/gh/athos/sweet-array/branch/main/graph/badge.svg?token=phoLI2vS9n)](https://codecov.io/gh/athos/sweet-array)
 
-Array manipulation library for Clojure with "sweet" type syntax and fewer pitfalls
+Array manipulation library for Clojure with "sweet" array type notation and more safety by static types
 
 ## Table of Contents
 
@@ -13,7 +13,7 @@ Array manipulation library for Clojure with "sweet" type syntax and fewer pitfal
   - [Array creation](#array-creation)
   - [Array indexing](#array-indexing)
   - [Type-related utilities](#type-related-utilities)
-- [Type syntax](#type-syntax)
+- [Array type notation](#array-type-notation)
 
 ## Rationale
 
@@ -89,7 +89,7 @@ write it straightforwardly, while it runs as fast as the optimized one shown abo
 to insert necessary type hints implicitly, so you don't have to add
 type hints yourself in most cases.
 
-Also, `sweet-array` adopts "sweet" type syntax (e.g. `[[double]]` and `[String]`),
+Also, `sweet-array` adopts "sweet" array type notation (e.g. `[[double]]` and `[String]`),
 so you don't have to be bothered with cryptic array type hints (e.g. `^"[[D"` and
 `^"[Ljava.lang.String;"`) any longer.
 
@@ -122,7 +122,7 @@ which can be used to create both primitive and reference type arrays:
 ```
 
 The first argument of the `new` macro is what we call an *array type descriptor*.
-See the [Type syntax](#type-syntax) section for more details, but roughly speaking,
+See the [Array type notation](#array-type-notation) section for more details, but roughly speaking,
 an array type descriptor `[T]` denotes an array type whose component type is `T`
 (e.g. `[int]` denotes int array type and `[String]` denotes String array type).
 
@@ -196,7 +196,7 @@ Another way to create an array is to use the `sweet-array.core/into-array` macro
 
 Like `clojure.core/into-array`, `sa/into-array` converts an existing collection
 (Seqable) into an array. Unlike `clojure.core/into-array`, the resulting array
-type is specified with the [array type descriptor](#type-syntax) as the first argument.
+type is specified with the [array type descriptor](#array-type-notation) as the first argument.
 
 `sa/into-array` can also be used to create multi-dimensional arrays:
 
@@ -334,7 +334,7 @@ array types.
 #### `(type [T])`
 
 The `sweet-array.core/type` macro is convenient to reify an array type represented
-with an [array type descriptor](#type-syntax):
+with an [array type descriptor](#array-type-notation):
 
 ```clojure
 (require '[sweet-array.core :as sa])
@@ -406,10 +406,10 @@ This code compiles without any reflection warning, just as with:
   (sa/aget arr (rand-int (alength arr))))
 ```
 
-## Type syntax
+## Array type notation
 
 `sweet-array` adopts what we call *array type descriptors* to denote array types
-throughout the library. Following is the syntax definition of `sweet-array`'s
+throughout the library. Following is the definition of `sweet-array`'s
 array type descriptors:
 
 ```

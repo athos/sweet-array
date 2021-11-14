@@ -1,5 +1,5 @@
 (defproject sweet-array "0.1.0-SNAPSHOT"
-  :description "Array manipulation library for Clojure with \"sweet\" type syntax with fewer pitfalls"
+  :description "Array manipulation library for Clojure with \"sweet\" array type notation and more safety by static types"
   :url "https://github.com/athos/sweet-array"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
             :url "https://www.eclipse.org/legal/epl-2.0/"}
