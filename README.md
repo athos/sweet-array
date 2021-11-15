@@ -1,5 +1,5 @@
 # sweet-array
-[![Clojars Project](https://img.shields.io/clojars/v/sweet-array.svg)](https://clojars.org/sweet-array)
+[![Clojars Project](https://img.shields.io/clojars/v/dev.athos/sweet-array.svg)](https://clojars.org/dev.athos/sweet-array)
 ![build](https://github.com/athos/sweet-array/workflows/build/badge.svg)
 [![codecov](https://codecov.io/gh/athos/sweet-array/branch/main/graph/badge.svg?token=phoLI2vS9n)](https://codecov.io/gh/athos/sweet-array)
 
@@ -97,7 +97,7 @@ so you don't have to be bothered with cryptic array type hints (e.g. `^"[[D"` an
 
 Add the following to your project dependencies:
 
-[![Clojars Project](https://clojars.org/sweet-array/latest-version.svg)](https://clojars.org/sweet-array)
+[![Clojars Project](https://clojars.org/dev.athos/sweet-array/latest-version.svg)](https://clojars.org/dev.athos/sweet-array)
 
 ## Usage
 
