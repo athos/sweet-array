@@ -17,53 +17,28 @@ Array manipulation library for Clojure with "sweet" array type notation and more
 
 ## Rationale
 
-Using Clojure's array functions, you can write code like the following:
+Clojure has built-in support for Java arrays and provides a small set of
+facilities for manipulating them, including `make-array`, `aget` and `aset`.
+However, some of its difficulties like the following tend to lead users to
+write verbose or unexpectedly inefficient code:
 
-```clojure
-(defn array-mul [a b]
-  (let [nrows (alength a)
-        ncols (alength (aget b 0))
-        n (alength b)
-        c (make-array Double/TYPE nrows ncols)]
-    (dotimes [i nrows]
-      (dotimes [j ncols]
-        (dotimes [k n]
-          (aset c i j
-                (+ (* (aget a i k)
-                      (aget b k j))
-                   (aget c i j))))))
-    c))
-```
+- Need to use different constructor functions for different types and array dimensions
+- Clojure compiler sometimes does not know the static type of arrays and may generate inefficient bytecode (especially for multi-dimensional arrays)
+- Array type hints tend to be cryptic (e.g. `[[D`, `[Ljava.lang.String;`, etc.) and occasionally pretty hard for humans to write manually
 
-Seems good? Unfortunately, the performance of this code is not as good as it looks.
-That’s because it contains a lot of reflective calls, some of which will be caught
-by the compiler as reflection warnings, the others will not!!
-To get rid of those problematic reflections, you need to add type hints here and there:
+These issues have been pointed out by various Clojurians out there in the past:
 
-```clojure
-(defn ^"[[D" array-mul [^"[[D" a ^"[[D" b]
-  (let [nrows (alength a)
-        ncols (alength ^doubles (aget b 0))
-        n (alength b)
-        ^"[[D" c (make-array Double/TYPE nrows ncols)]
-    (dotimes [i nrows]
-      (dotimes [j ncols]
-        (dotimes [k n]
-          (aset ^doubles (aget c i) j
-                (+ (* (aget ^doubles (aget a i) k)
-                      (aget ^doubles (aget b k) j))
-                   (aget ^doubles (aget c i) j))))))
-    c))
-```
+- [Taming multidim Arrays](http://clj-me.cgrand.net/2009/10/15/multidim-arrays/)  by Christophe Grand (@cgrand)
+- [Java arrays and unchecked math](http://clojure-goes-fast.com/blog/java-arrays-and-unchecked-math/) by Clojure Goes Fast
+- [CLJ-1289: aset-* and aget perform poorly on multi-dimensional arrays even with type hints](https://clojure.atlassian.net/browse/CLJ-1288)
 
-Knowing why and where to put type hints requires an extensive understanding of
-how the Clojure compiler works and how array functions are implemented.
-But roughly speaking, Clojure's array functions are not very good at handling
-multi-dimensional arrays (This issue has been reported as
-[CLJ-1289](https://clojure.atlassian.net/browse/CLJ-1289)).
+`sweet-array` aims to provide solutions for them. Contretely:
 
-Using `sweet-array`, you can write code that is almost as concise as how you would
-write it straightforwardly, while it runs as fast as the optimized one shown above:
+- It defines *array type descriptors*, a concise and intuitive array type notation, and provides a generic array constructor which can be used for any types and dimensions
+- The array constructors in the library maintain the static type of arrays, which reduces the cases where users have to add type hints manually
+- The array operators in the library automatically infer the resulting array type, so even multi-dimensional arrays can be handled efficiently
+
+As a result, we can write code like the following using `sweet-array`:
 
 ```clojure
 (require '[sweet-array.core :as sa])
@@ -85,13 +60,25 @@ write it straightforwardly, while it runs as fast as the optimized one shown abo
     c))
 ```
 
-`sweet-array` leverages the static types inferred by the Clojure compiler
-to insert necessary type hints implicitly, so you don't have to add
-type hints yourself in most cases.
+Instead of:
 
-Also, `sweet-array` adopts "sweet" array type notation (e.g. `[[double]]` and `[String]`),
-so you don't have to be bothered with cryptic array type hints (e.g. `^"[[D"` and
-`^"[Ljava.lang.String;"`) any longer.
+```clojure
+(defn ^"[[D" array-mul [^"[[D" a ^"[[D" b]
+  (let [nrows (alength a)
+        ncols (alength ^doubles (aget b 0))
+        n (alength b)
+        ^"[[D" c (make-array Double/TYPE nrows ncols)]
+    (dotimes [i nrows]
+      (dotimes [j ncols]
+        (dotimes [k n]
+          (aset ^doubles (aget c i) j
+                (+ (* (aget ^doubles (aget a i) k)
+                      (aget ^doubles (aget b k) j))
+                   (aget ^doubles (aget c i) j))))))
+    c))
+```
+
+Note that all the type hints in this code are mandatory to make it run as fast as the above one with `sweet-array`.
 
 ## Installation
 
