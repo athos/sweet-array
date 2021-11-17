@@ -17,13 +17,13 @@ Array manipulation library for Clojure with "sweet" array type notation and more
 
 ## Rationale
 
-Clojure has built-in support for Java arrays and provides a small set of
-facilities for manipulating them, including `make-array`, `aget` and `aset`.
-However, some of its difficulties like the following tend to lead users to
+Clojure has built-in support for Java arrays and provides a set of
+facilities for manipulating them, including `make-array`, `aget`, `aset` and so on.
+However, some of their difficulties like the following tend to lead users to
 write verbose or unexpectedly inefficient code:
 
-- Need to use different constructor functions for different types and array dimensions
-- Clojure compiler sometimes does not know the static type of arrays and may generate inefficient bytecode (especially for multi-dimensional arrays)
+- Need to use different constructor functions for different types and dimensionalities
+- Clojure compiler sometimes does not know the static type of arrays and may emit inefficient bytecode (especially for multi-dimensional arrays)
 - Array type hints tend to be cryptic (e.g. `[[D`, `[Ljava.lang.String;`, etc.) and occasionally pretty hard for humans to write manually
 
 These issues have been pointed out by various Clojurians out there in the past:
@@ -34,7 +34,7 @@ These issues have been pointed out by various Clojurians out there in the past:
 
 `sweet-array` aims to provide solutions for them. Contretely:
 
-- It defines *array type descriptors*, a concise and intuitive array type notation, and provides a generic array constructor which can be used for any types and dimensions
+- It defines *array type descriptors*, a concise and intuitive array type notation, and provides a generic array constructor which can be used for any types and dimensionalities
 - The array constructors in the library maintain the static type of arrays, which reduces the cases where users have to add type hints manually
 - The array operators in the library automatically infer the resulting array type, so even multi-dimensional arrays can be handled efficiently
 
@@ -111,7 +111,7 @@ which can be used to create both primitive and reference type arrays:
 The first argument of the `new` macro is what we call an *array type descriptor*.
 See the [Array type notation](#array-type-notation) section for more details, but roughly speaking,
 an array type descriptor `[T]` denotes an array type whose component type is `T`
-(e.g. `[int]` denotes int array type and `[String]` denotes String array type).
+(e.g. `[int]` denotes the int array type and `[String]` denotes the String array type).
 
 The `new` macro can also be used to create multi-dimensional arrays.
 The following example creates a two-dimensional int array:
@@ -123,9 +123,9 @@ The following example creates a two-dimensional int array:
 (alength (aget arr 0)) ;=> 3
 ```
 
-In general, `(sa/new [[T]] n1 n2)` creates a 2-d array of the type `T` with the size
-of `n1`x`n2` and `(sa/new [[[T]]] n1 n2 n3)` creates a 3-d array of the type `T`
-with the size of `n1`x`n2`x`n3`, and so on.
+In general, `(sa/new [[T]] n1 n2)` creates a 2-d array of the type `T` of size `n1`x`n2`
+and `(sa/new [[[T]]] n1 n2 n3)` creates a 3-d array of the type `T` of size `n1`x`n2`x`n3`,
+and so on.
 
 #### `(new [T] [elem1 elem2 ... elemk])`
 
@@ -149,7 +149,7 @@ In general, `(sa/new [T] [elem1 elem2 ... elemk])` is equivalent to:
   (aset (- k 1) elemk))
 ```
 
-This form can be used to initialize arbitrarily nested arrays:
+This form can be used to initialize arrays of any dimensionality:
 
 ```clojure
 ;; 2-d double array
@@ -208,7 +208,7 @@ while converting the collection into an array:
 ```
 
 This is especially useful to do transformations that increase or decrease
-the dimension of an array:
+the dimensionality of an array:
 
 ```clojure
 ;; 1-d to 2-d conversion
@@ -275,7 +275,7 @@ In a nutshell, they are safer and faster:
     ;; Can't apply aget to (sa/new [int] 3) with more than 1 index(es)
     ```
 - Faster access to multi-dimensional arrays by automatic type hint insertion
-  - `sa/aget` & `sa/aset` know that indexing `[T]` once results in the type `T`, and automatically insert obvious type hints to the expanded form, which reduces cases where one has to add type hints manually
+  - `sa/aget` & `sa/aset` know that indexing `[T]` once results in the type `T`, and automatically insert obvious type hints to the expanded form, which reduces the cases where one has to add type hints manually
     ```clojure
     (require '[criterium.core :as cr])
 
@@ -320,8 +320,8 @@ array types.
 
 #### `(type [T])`
 
-The `sweet-array.core/type` macro is convenient to reify an array type represented
-with an [array type descriptor](#array-type-notation):
+The `sweet-array.core/type` macro is convenient to reify an array type object
+represented with an [array type descriptor](#array-type-notation):
 
 ```clojure
 (require '[sweet-array.core :as sa])
@@ -331,7 +331,7 @@ with an [array type descriptor](#array-type-notation):
 (sa/type [[double]]) ;=> [[D
 ```
 
-Each form is more concise and straightforward than the corresponding idiomatic code:
+Each form shown above is more concise and straightforward than the corresponding traditional code:
 
 ```clojure
 (class (int-array 0)) ;=> [I
@@ -379,7 +379,7 @@ For those who want to radically eliminate cryptic array type hints (e.g. `^"[I"`
 and `^"[Ljava.lang.String;"`) from your code, `sweet-array` provides reader syntax
 that can be used as a replacement for them.
 
-By prefixing `#sweet/tag`, you can write a type hints with an array type descriptor:
+By prefixing `#sweet/tag`, you can write an array type descriptor as a type hint:
 
 ```clojure
 (defn ^#sweet/tag [String] select-randomly [^#sweet/tag [[String]] arr]
@@ -430,13 +430,13 @@ array type descriptors:
 
 An array type descriptor `[T]` denotes an array whose component type is `T`.
 The component type itself may be an array type. For instance, `[[T]]` denotes
-two-dimensional array type of `T`, `[[[T]]]` denotes three-dimensional array type
-of `T` and so on.
+the two-dimensional array type of `T`, `[[[T]]]` denotes the three-dimensional
+array type of `T`, and so on.
 
 Array type aliases, such as `ints` and `doubles`, may also be used as array type
 descriptors. They are completely interchangeable with their corresponding array type
-descriptor notation: `ints` is equivalent to `[int]` and `[doubles]` is equivalent
-to `[[double]]`, and so on.
+descriptor: `ints` is equivalent to `[int]` and `[doubles]` is equivalent to `[[double]]`,
+and so on.
 
 ## License
 
