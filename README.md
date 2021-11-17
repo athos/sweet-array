@@ -350,7 +350,9 @@ of the specified array type:
 (sa/instance? [String] "foo") ;=> false
 ```
 
-`(sa/instance? [T] expr)` is just syntactic sugar for `(instance? (sa/type [T]) expr)`.
+`(sa/instance? [T] expr)` is just syntactic sugar for `(instance? (sa/type [T]) expr)`,
+but this form compiles to a single JVM instruction, so it will run faster than something
+like `(instance? (class (int-array 0)) x)`.
 
 #### `(cast [T] expr)`
 
