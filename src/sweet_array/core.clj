@@ -50,10 +50,15 @@
 (defn ^Class type-fn [desc]
   (tag->type (tag-fn desc)))
 
-(defmacro type [desc]
+(defmacro type
+  "Returns the class object that represents the array type denoted by type-desc."
+  [desc]
   (type-fn desc))
 
-(defmacro instance? [type-desc x]
+(defmacro instance?
+  "Evaluates x and tests if it is an instance of the array type denoted by
+  type-desc."
+  [type-desc x]
   `(c/instance? ~(type-fn type-desc) ~x))
 
 (defn- warn [fmt & vals]
@@ -78,7 +83,10 @@
               `(~macro* ~asym ~@args)
               m))))))
 
-(defmacro aget [arr idx & more]
+(defmacro aget
+  "Works just like clojure.core/aget, but with static checking of the array type
+  to detect type errors at compile time."
+  [arr idx & more]
   (apply expand-to-macro* `aget* &form arr idx more))
 
 (defmacro aget* [arr idx & more]
@@ -122,7 +130,10 @@
    Float/TYPE `unchecked-float
    Double/TYPE `unchecked-double})
 
-(defmacro aset [arr idx & idxv]
+(defmacro aset
+  "Works just like clojure.core/aset, but with static checking of the array type
+  to detect type errors at compile time."
+  [arr idx & idxv]
   (apply expand-to-macro* `aset* &form arr idx idxv))
 
 (defmacro aset* [arr idx & idxv]
@@ -190,7 +201,14 @@
       `(~f ~inits)
       inits)))
 
-(defmacro new [type-desc & args]
+(defmacro new
+  "Creates an array of the type denoted by type-desc.
+
+  The macro has two forms:
+  - (new [T] n): produce an array of type T of size n
+  - (new [T] [e_1 ... e_n]): produce an array of type T of size n initialized
+    with elements e_1, ..., e_n."
+  [type-desc & args]
   (let [t (type-fn type-desc)]
     (cond (empty? args)
           `(sweet-array.core/new ~type-desc 0)
@@ -227,7 +245,11 @@
         (throw (ex-info msg {:form form}))))
     `(c/aclone ~arr)))
 
-(defmacro cast [type-desc expr]
+(defmacro cast
+  "Casts the given expression expr to the array type denoted by type-desc.
+
+  This macro only has the compile-time effect and does nothing at runtime."
+  [type-desc expr]
   (with-meta expr {:tag (tag-fn type-desc)}))
 
 (defn- into-array-form [t coll]
@@ -247,6 +269,8 @@
       coll)))
 
 (defmacro into-array
+  "Converts the given collection (seqable) to an array of the type denoted by
+  type-desc. A transducer may be supplied."
   ([type-desc coll]
    `(into-array ~type-desc nil ~coll))
   ([type-desc xform coll]
