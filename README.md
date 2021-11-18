@@ -123,8 +123,8 @@ The following example creates a two-dimensional int array:
 (alength (aget arr 0)) ;=> 3
 ```
 
-In general, `(sa/new [[T]] n1 n2)` creates a 2-d array of the type `T` of size `n1`x`n2`
-and `(sa/new [[[T]]] n1 n2 n3)` creates a 3-d array of the type `T` of size `n1`x`n2`x`n3`,
+In general, `(sa/new [[T]] n1 n2)` produces a 2-d array of type `T` of size `n1`x`n2`
+and `(sa/new [[[T]]] n1 n2 n3)` produces a 3-d array of type `T` of size `n1`x`n2`x`n3`,
 and so on.
 
 #### `(new [T] [elem1 elem2 ... elemk])`
@@ -161,7 +161,7 @@ This form can be used to initialize arrays of any dimensionality:
 ```
 
 When initializing multi-dimensional arrays, the init expression for each element
-may itself be an array or an expression that generates an array:
+may itself be an array or an expression that evaluates to an array:
 
 ```clojure
 (def xs (sa/new [double] [1.0 2.0]))
@@ -268,7 +268,7 @@ In a nutshell, they are safer and faster:
     ;; Syntax error macroexpanding sweet-array.core/aget* at ...
     ;; Can't apply aget to "I'm a string", which is java.lang.String, not array
     ```
-  - If more indices are passed to them than the number of dimensions of the inferred array type, then they will raise a compile-time error
+  - If more indices are passed to them than the inferred array type expects, then they will raise a compile-time error
     ```clojure
     (sa/aget (sa/new [int] 3) 0 1 2)
     ;; Syntax error macroexpanding sweet-array.core/aget* at ...
@@ -358,7 +358,7 @@ like `(instance? (class (int-array 0)) x)`.
 
 The `sweet-array.core/cast` macro is for coercing an expression to the specified
 array type. It's useful for resolving reflection warnings when some expression
-cannot be inferred:
+cannot be type-inferred:
 
 ```clojure
 (defn make-array [n] (sa/new [int] n))
@@ -373,7 +373,7 @@ cannot be inferred:
 ;=> 0
 ```
 
-Note that `sa/cast` only has the compile-time effect, and does nothing at runtime.
+Note that `sa/cast` only has the compile-time effect, and does nothing else at runtime.
 
 #### `#sweet/tag [T]`
 
