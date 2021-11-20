@@ -127,11 +127,11 @@ In general, `(sa/new [[T]] n1 n2)` produces a 2-d array of type `T` of size `n1`
 and `(sa/new [[[T]]] n1 n2 n3)` produces a 3-d array of type `T` of size `n1`x`n2`x`n3`,
 and so on.
 
-#### `(new [T] [elem1 elem2 ... elemk])`
+#### `(new [T] [e1 e2 ... ek])`
 
 The `new` macro provides another syntax to create an array enumerating
-the initial elements. `(sa/new [T] [elem1 elem2 ... elemk])` creates an array
-initialized with the elements `elem1`, `elem2`, ..., `elemk`:
+the initial elements. `(sa/new [T] [e1 e2 ... ek])` creates an array
+initialized with the elements `e1`, `e2`, ..., `ek`:
 
 ```clojure
 (def arr (sa/new [int] [1 2 3]))
@@ -139,14 +139,14 @@ initialized with the elements `elem1`, `elem2`, ..., `elemk`:
 [(aget arr 0) (aget arr 1) (aget arr 2)] ;=> [1 2 3]
 ```
 
-In general, `(sa/new [T] [elem1 elem2 ... elemk])` is equivalent to:
+In general, `(sa/new [T] [e1 e2 ... ek])` is equivalent to:
 
 ```clojure
 (doto (sa/new [T] k)
-  (aset 0 elem1)
-  (aset 1 elem2)
+  (aset 0 e1)
+  (aset 1 e2)
   ...
-  (aset (- k 1) elemk))
+  (aset (- k 1) ek))
 ```
 
 This form can be used to initialize arrays of any dimensionality:
