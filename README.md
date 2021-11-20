@@ -100,11 +100,11 @@ which can be used to create both primitive and reference type arrays:
 (require '[sweet-array.core :as sa])
 
 (def xs (sa/new [int] 3))
-(class xs) ;=> [I
+(class xs) ;=> [I, which means int array type
 (alength xs) ;=> 3
 
 (def ys (sa/new [String] 5))
-(class ys) ;=> [Ljava.lang.String;
+(class ys) ;=> [Ljava.lang.String;, which means String array type
 (alength ys) ;=> 5
 ```
 
@@ -118,7 +118,7 @@ The following example creates a two-dimensional int array:
 
 ```clojure
 (def arr (sa/new [[int]] 2 3))
-(class arr) ;=> [[I
+(class arr) ;=> [[I, which means 2-d int array type
 (alength arr) ;=> 2
 (alength (aget arr 0)) ;=> 3
 ```
