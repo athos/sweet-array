@@ -282,3 +282,62 @@
          (expand-into-array t coll)
          (into-array-form ctype coll))
        {:tag (tag-fn type-desc)}))))
+
+(defmacro def
+  "The macro version of def dedicated to arrays.
+  This macro can be used as a drop-in replacement for Clojure's def. Unlike
+  the ordinary def form, (sweet-array.core/def <var> <init>) infers the static
+  type of <init> and implicitly adds the inferred type as the type hint for <var>.
+  Throws an error at macro expansion time if the type of <init> cannot be statically
+  inferred or if the inferred type is not an array type."
+  {:added "0.2.0"
+   :clj-kondo/lint-as 'clj-kondo.lint-as/def-catch-all}
+  ([name arr]
+   (with-meta `(sweet-array.core/def ~name nil ~arr) (meta &form)))
+  ([name docstr arr]
+   (if (symbol? arr)
+     (with-meta `(def* ~name ~arr) (meta &form))
+     (let [asym (gensym 'init)]
+       `(let [~asym ~arr]
+          ~(with-meta
+             `(def* ~name ~asym ~docstr ~arr)
+             (meta &form)))))))
+
+(defmacro def* [name sym docstr expr]
+  (let [^Class inferred-type (ty/infer-type &env sym)
+        tag (:tag (meta name))
+        ^Class hinted-type (some-> tag ty/resolve-tag)]
+    (cond (and tag (nil? hinted-type))
+          (let [msg (format "Unable to resolve tag: %s in this context"
+                            (pr-str tag))]
+            (throw (ex-info msg {:hinted-tag tag})))
+
+          (and (nil? inferred-type) (nil? hinted-type))
+          (let [msg (str "Can't infer the static type of " (pr-str expr) ". "
+                         "Use `sweet-array.core/cast` to explicitly specify "
+                         "the array type or use `def` instead.")]
+            (throw (ex-info msg {})))
+
+          (and inferred-type (not (.isArray inferred-type)))
+          (let [msg (str "Can't use sweet-array.core/def for " (pr-str expr)
+                         ", which is " (.getName inferred-type) ", not array")]
+            (throw (ex-info msg {:inferred-type inferred-type})))
+
+          (and hinted-type (not (.isArray hinted-type)))
+          (let [msg (format "Hinted type (%s) is not an array type"
+                            (.getName hinted-type))]
+            (throw (ex-info msg {:hinted-type hinted-type})))
+
+          (and hinted-type
+               inferred-type
+               (not (.isAssignableFrom hinted-type inferred-type)))
+          (let [msg (format "Inferred type (%s) is not compatible with hinted type (%s)"
+                            (.getName inferred-type)
+                            (.getName hinted-type))]
+            (throw (ex-info msg {:hinted-type hinted-type
+                                 :inferred-type inferred-type})))
+
+          :else
+          `(def ~(vary-meta name assoc :tag (or hinted-type inferred-type))
+             ~@(when docstr [docstr])
+             ~sym))))
