@@ -56,6 +56,16 @@
   (is (not (sa/instance? [[long]] (long-array [1 2 3]))))
   (is (not (sa/instance? [double] (make-array Double/TYPE 0 0)))))
 
+(deftest array-type?-test
+  (is (sa/array-type? (sa/type [String])))
+  (is (not (sa/array-type? String)))
+  (is (not (sa/array-type? nil))))
+
+(deftest array?-test
+  (is (sa/array? (sa/new [int] [1 2 3])))
+  (is (not (sa/array? 42)))
+  (is (not (sa/array? nil))))
+
 (deftest cast-test
   (let [arr (make-array Integer/TYPE 0)
         arr' (sa/cast [int] arr)]
