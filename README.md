@@ -11,6 +11,7 @@ Array manipulation library for Clojure with "sweet" array type notation and more
 - [Installation](#installation)
 - [Usage](#usage)
   - [Array creation](#array-creation)
+  - [Array definition](#array-definition)
   - [Array indexing](#array-indexing)
   - [Type-related utilities](#type-related-utilities)
 - [Array type notation](#array-type-notation)
@@ -41,41 +42,45 @@ These issues have been pointed out by various Clojurians out there in the past:
 As a result, we can write code like the following using `sweet-array`:
 
 ```clojure
+;; Example of multiplying two arrays as matrices
+
 (require '[sweet-array.core :as sa])
 
-(defn ^#sweet/tag [[double]] array-mul [a b]
-  (let [a (sa/cast [[double]] a)
-        b (sa/cast [[double]] b)
-        nrows (alength a)
-        ncols (alength (sa/aget b 0))
-        n (alength b)
-        c (sa/new [[double]] nrows ncols)]
-    (dotimes [i nrows]
-      (dotimes [j ncols]
-        (dotimes [k n]
-          (sa/aset c i j
-                   (+ (* (sa/aget a i k)
-                         (sa/aget b k j))
-                      (sa/aget c i j))))))
-    c))
+(sa/def a (sa/new [[double]] [[1.0 2.0] [3.0 4.0]]))
+(sa/def b (sa/new [[double]] [[5.0 6.0] [7.0 8.0]]))
+
+(let [nrows (alength a)
+      ncols (alength (sa/aget b 0))
+      n (alength b)
+      c (sa/new [[double]] nrows ncols)]
+  (dotimes [i nrows]
+    (dotimes [j ncols]
+      (dotimes [k n]
+        (sa/aset c i j
+                 (+ (* (sa/aget a i k)
+                       (sa/aget b k j))
+                   (sa/aget c i j))))))
+  c)
 ```
 
 Instead of:
 
 ```clojure
-(defn ^"[[D" array-mul [^"[[D" a ^"[[D" b]
-  (let [nrows (alength a)
-        ncols (alength ^doubles (aget b 0))
-        n (alength b)
-        ^"[[D" c (make-array Double/TYPE nrows ncols)]
-    (dotimes [i nrows]
-      (dotimes [j ncols]
-        (dotimes [k n]
-          (aset ^doubles (aget c i) j
-                (+ (* (aget ^doubles (aget a i) k)
-                      (aget ^doubles (aget b k) j))
-                   (aget ^doubles (aget c i) j))))))
-    c))
+(def ^"[[D" a (into-array [(double-array [1.0 2.0]) (double-array [3.0 4.0])]))
+(def ^"[[D" b (into-array [(double-array [5.0 6.0]) (double-array [7.0 8.0])]))
+
+(let [nrows (alength a)
+      ncols (alength ^doubles (aget b 0))
+      n (alength b)
+      ^"[[D" c (make-array Double/TYPE nrows ncols)]
+  (dotimes [i nrows]
+    (dotimes [j ncols]
+      (dotimes [k n]
+        (aset ^doubles (aget c i) j
+              (+ (* (aget ^doubles (aget a i) k)
+                    (aget ^doubles (aget b k) j))
+                  (aget ^doubles (aget c i) j))))))
+  c)
 ```
 
 Note that all the type hints in this code are mandatory to make it run as fast as the above one with `sweet-array`.
@@ -218,6 +223,38 @@ the dimensionality of an array:
 (sa/into-array [double] cat (sa/new [[double]] [[1.0 2.0] [3.0 4.0]]))
 ```
 
+### Array definition
+
+#### `(def name init)`
+#### `(def name docstring init)`
+
+Since 0.2.0, `sweet-array` provides its own version of the `def` macro.
+It can be used as a drop-in replacement of Clojure's `def`. Unlike the ordinary
+`def` form, it infers the static type of `init` and implicitly adds the inferred
+Using the `def` macro together with other macros from this library, it's hardly
+necessary to add a type hint explicitly:
+
+```clojure
+(sa/def arr (sa/new [int] [1 2 3]))
+
+(:tag (meta #arr))
+;=> [I
+```
+
+Note that the `def` macro will throw an error at expansion time if the type of
+the `init` expression cannot be inferred or the inferred type is not an array
+type:
+
+```clojure
+(sa/def arr (identity (sa/new [int] [1 2 3])))
+;; Syntax error macroexpanding sweet-array.core/def* at (REPL:1:1).
+;; Can't infer the static type of (identity (sa/new [int] [1 2 3])). Use `sweet-array.core/cast` to explicitly specify the array type or use `def` instead.
+
+(sa/def arr 42)
+;; Syntax error macroexpanding sweet-array.core/def* at (REPL:1:1).
+;; Can't use sweet-array.core/def for 42, which is long, not array
+```
+
 ### Array indexing
 
 #### `(aget array idx1 idx2 ... idxk)`
@@ -229,7 +266,7 @@ They work almost the same way as `aget` / `aset` defined in `clojure.core`:
 ```clojure
 (require '[sweet-array.core :as sa])
 
-(def ^"[I" arr (sa/new [int] [1 2 3 4 5]))
+(sa/def arr (sa/new [int] [1 2 3 4 5]))
 
 (sa/aget arr 2) ;=> 3
 (sa/aset arr 2 42)
@@ -240,7 +277,7 @@ Of course, they can also be used for multi-dimensional arrays as
 `c.c/aget` & `aset`:
 
 ```clojure
-(def ^"[D" arr (sa/new [double] [[1.0 2.0] [3.0 4.0]]))
+(sa/def arr (sa/new [double] [[1.0 2.0] [3.0 4.0]]))
 
 (sa/aget arr 1 1) ;=> 4.0
 (sa/aset arr 1 1 42)
@@ -279,7 +316,7 @@ In a nutshell, they are safer and faster:
     ```clojure
     (require '[criterium.core :as cr])
 
-    (def ^"[[I" arr
+    (sa/def arr
       (sa/into-array [[int]] (map (fn [i] (map (fn [j] (* i j)) (range 10))) (range 10)))
 
     (cr/quick-bench (dotimes [i 10] (dotimes [j 10] (aget arr i j))))
