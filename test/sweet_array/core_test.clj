@@ -299,3 +299,22 @@
                            *err* *out*]
                    (macroexpand
                     `(sa/aset arr-without-type-hint 0 0 42)))))))
+
+(sa/def arr1 (int-array [1 2 3]))
+(sa/def arr2 (sa/into-array [[double]] (partition-all 2) (range 4)))
+(sa/def arr3 (sa/cast [String] (into-array String ["foo"])))
+(sa/def ^ints arr4 (into-array Integer/TYPE [1 2 3]))
+(sa/def ^#sweet/tag [CharSequence] arr5 (sa/new [String] ["foo"]))
+
+(deftest def-test
+  (is (= (sa/type [int]) (infer arr1)))
+  (is (= (sa/type [[double]]) (infer arr2)))
+  (is (= (sa/type [String]) (infer arr3)))
+  (is (= (sa/type [int]) (infer arr4)))
+  (is (= (sa/type [CharSequence]) (infer arr5)))
+  (are [form] (thrown? Exception
+                       (binding [*ns* (the-ns 'sweet-array.core-test)]
+                         (eval form)))
+    '(sa/def arr (identity (sa/new [int] [1 2 3])))
+    '(sa/def arr 42)
+    '(sa/def ^#sweet/tag [String] arr (sa/new [int] [1 2 3]))))
