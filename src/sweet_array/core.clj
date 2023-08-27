@@ -47,7 +47,7 @@
 (defmacro tag [desc]
   (tag-fn desc))
 
-(defn ^Class type-fn [desc]
+(defn type-fn ^Class [desc]
   (tag->type (tag-fn desc)))
 
 (defmacro type
@@ -90,7 +90,7 @@
   (apply expand-to-macro* `aget* &form arr idx more))
 
 (defmacro aget* [arr idx & more]
-  (if-let [^Class t (ty/infer-type &env arr)]
+  (if-let [t (ty/infer-type &env arr)]
     (if (not (.isArray t))
       (let [form (::form (meta &form))
             msg (str "Can't apply aget to "
@@ -137,7 +137,7 @@
   (apply expand-to-macro* `aset* &form arr idx idxv))
 
 (defmacro aset* [arr idx & idxv]
-  (if-let [^Class t (ty/infer-type &env arr)]
+  (if-let [t (ty/infer-type &env arr)]
     (if (not (.isArray t))
       (let [form (::form (meta &form))
             msg (str "Can't apply aset to "
@@ -235,7 +235,7 @@
   (expand-to-macro* `aclone* &form arr))
 
 (defmacro aclone* [arr]
-  (if-let [^Class t (ty/infer-type &env arr)]
+  (if-let [t (ty/infer-type &env arr)]
     (if (.isArray t)
       (with-meta `(c/aclone ~arr) {:tag (type->tag t)})
       (let [form (::form (meta &form))
@@ -304,7 +304,7 @@
              (meta &form)))))))
 
 (defmacro def* [name sym docstr expr]
-  (let [^Class inferred-type (ty/infer-type &env sym)
+  (let [inferred-type (ty/infer-type &env sym)
         tag (:tag (meta name))
         ^Class hinted-type (some-> tag ty/resolve-tag)]
     (cond (and tag (nil? hinted-type))
