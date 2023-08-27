@@ -1,5 +1,5 @@
 {:paths ["src"]
- :deps {type-infer/type-infer {:mvn/version "0.1.1"}}
+ :deps {dev.athos/type-infer {:mvn/version "0.1.2"}}
  :aliases
  {:check
   {:extra-deps
