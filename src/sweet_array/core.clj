@@ -61,6 +61,18 @@
   [type-desc x]
   `(c/instance? ~(type-fn type-desc) ~x))
 
+(defn array-type?
+  "Returns true if and only if the given type is an array type."
+  {:added "0.2.0"}
+  [^Class t]
+  (and (not (nil? t)) (.isArray t)))
+
+(defn array?
+  "Returns true if and only if the given object is an array."
+  {:added "0.2.0"}
+  [x]
+  (array-type? (class x)))
+
 (defn- warn [fmt & vals]
   (binding [*out* *err*]
     (apply printf fmt vals)
@@ -91,7 +103,7 @@
 
 (defmacro aget* [arr idx & more]
   (if-let [t (ty/infer-type &env arr)]
-    (if (not (.isArray t))
+    (if (not (array-type? t))
       (let [form (::form (meta &form))
             msg (str "Can't apply aget to "
                      (pr-str (second form))
@@ -99,7 +111,7 @@
         (throw (ex-info msg {:form form})))
       (loop [t t, arr arr, idx (cons idx more), n 0]
         (if (seq idx)
-          (if (.isArray t)
+          (if (array-type? t)
             (let [ctype (.getComponentType t)]
               (recur ctype
                      (with-meta
@@ -138,7 +150,7 @@
 
 (defmacro aset* [arr idx & idxv]
   (if-let [t (ty/infer-type &env arr)]
-    (if (not (.isArray t))
+    (if (not (array-type? t))
       (let [form (::form (meta &form))
             msg (str "Can't apply aset to "
                      (pr-str (second form))
@@ -184,7 +196,7 @@
     `(Array/newInstance ~t (unchecked-int ~size))))
 
 (defn- expand-inits [^Class t inits]
-  (if (.isArray t)
+  (if (array-type? t)
     (if (vector? inits)
       (let [asym (gensym 'arr)
             ctype (.getComponentType t)]
@@ -219,7 +231,7 @@
           :else
           (loop [t' t args' args n 0]
             (if (seq args')
-              (if (.isArray t')
+              (if (array-type? t')
                 (recur (.getComponentType t') (rest args') (inc n))
                 (throw
                  (ex-info (str (.getName t) " can't take more than "
@@ -236,7 +248,7 @@
 
 (defmacro aclone* [arr]
   (if-let [t (ty/infer-type &env arr)]
-    (if (.isArray t)
+    (if (array-type? t)
       (with-meta `(c/aclone ~arr) {:tag (type->tag t)})
       (let [form (::form (meta &form))
             msg (str "Can't apply aclone to "
@@ -258,7 +270,7 @@
     `(c/into-array ~t ~coll)))
 
 (defn- expand-into-array [^Class type coll]
-  (if (.isArray type)
+  (if (array-type? type)
     (let [ctype (.getComponentType type)
           coll-sym (gensym 'coll)]
       (into-array-form ctype
@@ -278,7 +290,7 @@
          ctype (.getComponentType t)
          coll (cond->> coll xform (list `sequence xform))]
      (with-meta
-       (if (.isArray ctype)
+       (if (array-type? ctype)
          (expand-into-array t coll)
          (into-array-form ctype coll))
        {:tag (tag-fn type-desc)}))))
@@ -318,12 +330,12 @@
                          "the array type or use `def` instead.")]
             (throw (ex-info msg {})))
 
-          (and inferred-type (not (.isArray inferred-type)))
+          (and inferred-type (not (array-type? inferred-type)))
           (let [msg (str "Can't use sweet-array.core/def for " (pr-str expr)
                          ", which is " (.getName inferred-type) ", not array")]
             (throw (ex-info msg {:inferred-type inferred-type})))
 
-          (and hinted-type (not (.isArray hinted-type)))
+          (and hinted-type (not (array-type? hinted-type)))
           (let [msg (format "Hinted type (%s) is not an array type"
                             (.getName hinted-type))]
             (throw (ex-info msg {:hinted-type hinted-type})))
