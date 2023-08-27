@@ -42,41 +42,45 @@ These issues have been pointed out by various Clojurians out there in the past:
 As a result, we can write code like the following using `sweet-array`:
 
 ```clojure
+;; Example of multiplying two arrays as matrices
+
 (require '[sweet-array.core :as sa])
 
-(defn ^#sweet/tag [[double]] array-mul [a b]
-  (let [a (sa/cast [[double]] a)
-        b (sa/cast [[double]] b)
-        nrows (alength a)
-        ncols (alength (sa/aget b 0))
-        n (alength b)
-        c (sa/new [[double]] nrows ncols)]
-    (dotimes [i nrows]
-      (dotimes [j ncols]
-        (dotimes [k n]
-          (sa/aset c i j
-                   (+ (* (sa/aget a i k)
-                         (sa/aget b k j))
-                      (sa/aget c i j))))))
-    c))
+(sa/def a (sa/new [[double]] [[1.0 2.0] [3.0 4.0]]))
+(sa/def b (sa/new [[double]] [[5.0 6.0] [7.0 8.0]]))
+
+(let [nrows (alength a)
+      ncols (alength (sa/aget b 0))
+      n (alength b)
+      c (sa/new [[double]] nrows ncols)]
+  (dotimes [i nrows]
+    (dotimes [j ncols]
+      (dotimes [k n]
+        (sa/aset c i j
+                 (+ (* (sa/aget a i k)
+                       (sa/aget b k j))
+                   (sa/aget c i j))))))
+  c)
 ```
 
 Instead of:
 
 ```clojure
-(defn ^"[[D" array-mul [^"[[D" a ^"[[D" b]
-  (let [nrows (alength a)
-        ncols (alength ^doubles (aget b 0))
-        n (alength b)
-        ^"[[D" c (make-array Double/TYPE nrows ncols)]
-    (dotimes [i nrows]
-      (dotimes [j ncols]
-        (dotimes [k n]
-          (aset ^doubles (aget c i) j
-                (+ (* (aget ^doubles (aget a i) k)
-                      (aget ^doubles (aget b k) j))
-                   (aget ^doubles (aget c i) j))))))
-    c))
+(def ^"[[D" a (into-array [(double-array [1.0 2.0]) (double-array [3.0 4.0])]))
+(def ^"[[D" b (into-array [(double-array [5.0 6.0]) (double-array [7.0 8.0])]))
+
+(let [nrows (alength a)
+      ncols (alength ^doubles (aget b 0))
+      n (alength b)
+      ^"[[D" c (make-array Double/TYPE nrows ncols)]
+  (dotimes [i nrows]
+    (dotimes [j ncols]
+      (dotimes [k n]
+        (aset ^doubles (aget c i) j
+              (+ (* (aget ^doubles (aget a i) k)
+                    (aget ^doubles (aget b k) j))
+                  (aget ^doubles (aget c i) j))))))
+  c)
 ```
 
 Note that all the type hints in this code are mandatory to make it run as fast as the above one with `sweet-array`.
