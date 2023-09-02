@@ -4,15 +4,15 @@
  {:check
   {:extra-deps
    {io.github.athos/clj-check
-    {:git/sha "0ca84df1357d71429243b99908303f45a934654c"}}
+    {:git/sha "518d5a1cbfcd7c952f548e6dbfcb9a4a5faf9062"}}
    :main-opts ["-m" "clj-check.check"]}
   :test
   {:extra-paths ["test"]
    :extra-deps
    {io.github.cognitect-labs/test-runner
-    {:git/tag "v0.5.0" :git/sha "b3fd0d2"}}
+    {:git/tag "v0.5.1" :git/sha "dfb30dd"}}
    :main-opts ["-m" "cognitect.test-runner"]
    :exec-fn cognitect.test-runner.api/test}
   :coverage
-  {:extra-deps {cloverage/cloverage {:mvn/version "1.1.2"}}
+  {:extra-deps {cloverage/cloverage {:mvn/version "1.2.4"}}
    :main-opts ["-m" "cloverage.coverage" "-p" "src" "-s" "test" "--codecov"]}}}
