@@ -437,32 +437,42 @@ throughout the library. Following is the definition of `sweet-array`'s
 array type descriptors:
 
 ```
-    <array type descriptor> ::= '[' <component type> ']'
-                        | <array type alias>
+      <array type descriptor> ::= '[' + <component type> + ']'
+                                | <array type alias>
 
-     <component type> ::= <primitive type name>
-                        | <reference type name>
-                        | <array type descriptor>
+             <component type> ::= <primitive type name>
+                                | <reference type name>
+                                | <array type descriptor>
 
-<primitive type name> ::= 'boolean'
-                        | 'byte'
-                        | 'char'
-                        | 'short'
-                        | 'int'
-                        | 'long'
-                        | 'float'
-                        | 'double'
+        <primitive type name> ::= <symbol primitive type name>
+                                | <keyword primitive type name>
 
-<reference type name> ::= any valid class or interface name
+ <symbol primitive type name> ::= 'boolean'
+                                | 'byte'
+                                | 'char'
+                                | 'short'
+                                | 'int'
+                                | 'long'
+                                | 'float'
+                                | 'double'
 
-   <array type alias> ::= 'booleans'
-                        | 'bytes'
-                        | 'shorts'
-                        | 'ints'
-                        | 'longs'
-                        | 'floats'
-                        | 'doubles'
-                        | 'objects'
+<keyword primitive type name> ::= ':' + <symbol primitive type name>
+
+        <reference type name> ::= any valid class or interface name
+
+           <array type alias> ::= <symbol array type alias>
+                                | <keyword array type alias>
+
+    <symbol array type alias> ::= 'booleans'
+                                | 'bytes'
+                                | 'shorts'
+                                | 'ints'
+                                | 'longs'
+                                | 'floats'
+                                | 'doubles'
+                                | 'objects'
+
+   <keyword array type alias> ::= ':' + <symbol array type alias>
 ```
 
 An array type descriptor `[T]` denotes an array whose component type is `T`.
