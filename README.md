@@ -132,6 +132,11 @@ In general, `(sa/new [[T]] n1 n2)` produces a 2-d array of type `T` of size `n1`
 and `(sa/new [[[T]]] n1 n2 n3)` produces a 3-d array of type `T` of size `n1`x`n2`x`n3`,
 and so on.
 
+> [!NOTE]
+> For primitive types, `T` can also be represented as a keyword instead of a bare symbol
+> (as in `[:int]` or `[[:double]]`). This is useful to avoid issues with automatic
+> namespace qualification in the syntax quote and false alerts reported by the linter.
+
 #### `(new [T] [e1 e2 ... ek])`
 
 The `new` macro provides another syntax to create an array enumerating
