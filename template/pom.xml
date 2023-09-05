@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <name>sweet-array</name>
+  <description>Array manipulation library for Clojure with "sweet" array type notation and more safety by static types</description>
+  <url>https://github.com/athos/sweet-array</url>
+  <licenses>
+    <license>
+      <name>EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0</name>
+      <url>https://www.eclipse.org/legal/epl-2.0/</url>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>athos</id>
+      <name>Shogo Ohta</name>
+    </developer>
+  </developers>
+  <scm>
+    <url>https://github.com/athos/sweet-array</url>
+    <connection>scm:git:git://github.com/athos/sweet-array.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/athos/sweet-array.git</developerConnection>
+  </scm>
+</project>

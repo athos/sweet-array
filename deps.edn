@@ -15,4 +15,9 @@
    :exec-fn cognitect.test-runner.api/test}
   :coverage
   {:extra-deps {cloverage/cloverage {:mvn/version "1.2.4"}}
-   :main-opts ["-m" "cloverage.coverage" "-p" "src" "-s" "test" "--codecov"]}}}
+   :main-opts ["-m" "cloverage.coverage" "-p" "src" "-s" "test" "--codecov"]}
+  :build
+  {:deps
+   {io.github.clojure/tools.build {:git/tag "v0.9.5" :git/sha "24f2894"}
+    io.github.seancorfield/build-clj {:git/tag "v0.9.2" :git/sha "9c9f078"}}
+   :ns-default build}}}
