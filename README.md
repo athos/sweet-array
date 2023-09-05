@@ -132,6 +132,11 @@ In general, `(sa/new [[T]] n1 n2)` produces a 2-d array of type `T` of size `n1`
 and `(sa/new [[[T]]] n1 n2 n3)` produces a 3-d array of type `T` of size `n1`x`n2`x`n3`,
 and so on.
 
+> [!NOTE]
+> For primitive types, `T` can also be represented as a keyword instead of a bare symbol
+> (as in `[:int]` or `[[:double]]`). This is useful to avoid issues with automatic
+> namespace qualification in the syntax quote and false alerts reported by the linter.
+
 #### `(new [T] [e1 e2 ... ek])`
 
 The `new` macro provides another syntax to create an array enumerating
@@ -437,32 +442,42 @@ throughout the library. Following is the definition of `sweet-array`'s
 array type descriptors:
 
 ```
-    <array type descriptor> ::= '[' <component type> ']'
-                        | <array type alias>
+      <array type descriptor> ::= '[' + <component type> + ']'
+                                | <array type alias>
 
-     <component type> ::= <primitive type name>
-                        | <reference type name>
-                        | <array type descriptor>
+             <component type> ::= <primitive type name>
+                                | <reference type name>
+                                | <array type descriptor>
 
-<primitive type name> ::= 'boolean'
-                        | 'byte'
-                        | 'char'
-                        | 'short'
-                        | 'int'
-                        | 'long'
-                        | 'float'
-                        | 'double'
+        <primitive type name> ::= <symbol primitive type name>
+                                | <keyword primitive type name>
 
-<reference type name> ::= any valid class or interface name
+ <symbol primitive type name> ::= 'boolean'
+                                | 'byte'
+                                | 'char'
+                                | 'short'
+                                | 'int'
+                                | 'long'
+                                | 'float'
+                                | 'double'
 
-   <array type alias> ::= 'booleans'
-                        | 'bytes'
-                        | 'shorts'
-                        | 'ints'
-                        | 'longs'
-                        | 'floats'
-                        | 'doubles'
-                        | 'objects'
+<keyword primitive type name> ::= ':' + <symbol primitive type name>
+
+        <reference type name> ::= any valid class or interface name
+
+           <array type alias> ::= <symbol array type alias>
+                                | <keyword array type alias>
+
+    <symbol array type alias> ::= 'booleans'
+                                | 'bytes'
+                                | 'shorts'
+                                | 'ints'
+                                | 'longs'
+                                | 'floats'
+                                | 'doubles'
+                                | 'objects'
+
+   <keyword array type alias> ::= ':' + <symbol array type alias>
 ```
 
 An array type descriptor `[T]` denotes an array whose component type is `T`.

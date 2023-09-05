@@ -12,10 +12,10 @@
   (Class/forName tag))
 
 (def ^:private array-type-tags
-  '{booleans "[Z", bytes "[B", chars "[C"
-    shorts "[S", ints "[I", longs "[J"
-    floats "[F", doubles "[D"
-    objects "[Ljava.lang.Object;"})
+  {"booleans" "[Z", "bytes" "[B", "chars" "[C"
+   "shorts" "[S", "ints" "[I", "longs" "[J"
+   "floats" "[F", "doubles" "[D"
+   "objects" "[Ljava.lang.Object;"})
 
 (defn tag-fn [type-desc]
   (letfn [(error! []
@@ -28,19 +28,23 @@
                     (str \[ (step (first desc)))
                     (error!))
 
-                  (symbol? desc)
-                  (case desc
-                    boolean "Z" byte "B" char "C" short "S"
-                    int "I" long "J" float "F" double "D"
-                    (or (array-type-tags desc)
-                        (when-let [ret (resolve desc)]
-                          (when (class? ret)
-                            (str \L (.getName ^Class ret) \;)))
-                        (error!)))
+                  (ident? desc)
+                  (or (when (nil? (namespace desc))
+                        (let [desc' (name desc)]
+                          (case desc'
+                            "boolean" "Z" "byte" "B" "char" "C" "short" "S"
+                            "int" "I" "long" "J" "float" "F" "double" "D"
+                            (array-type-tags desc'))))
+                      (when-let [ret (and (symbol? desc) (resolve desc))]
+                        (when (class? ret)
+                          (str \L (.getName ^Class ret) \;)))
+                      (error!))
 
                   :else (error!)))]
     (when-not (or (vector? type-desc)
-                  (array-type-tags type-desc))
+                  (and (ident? type-desc)
+                       (nil? (namespace type-desc))
+                       (array-type-tags (name type-desc))))
       (error!))
     (step type-desc)))
 
