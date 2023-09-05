@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. This change
 ### Added
 - [#1](https://github.com/athos/sweet-array/pull/1) Add `def` macro
 - [#3](https://github.com/athos/sweet-array/pull/3) Add `array?` / `array-type?`
+- [#6](https://github.com/athos/sweet-array/pull/6) Support keywords to denote primitive types in array type descriptors
 
 ## [0.1.0] - 2021-11-23
 - First release
