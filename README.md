@@ -87,9 +87,17 @@ Note that all the type hints in this code are mandatory to make it run as fast a
 
 ## Installation
 
-Add the following to your project dependencies:
+Add the following to your `deps.edn` / `project.clj`:
 
-[![Clojars Project](https://clojars.org/dev.athos/sweet-array/latest-version.svg)](https://clojars.org/dev.athos/sweet-array)
+- `deps.edn`
+```
+{dev.athos/sweet-array {:mvn/version "0.2.0"}}
+```
+
+- `project.clj`
+```
+[dev.athos/sweet-array "0.2.0"]
+```
 
 ## Usage
 
