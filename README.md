@@ -25,7 +25,8 @@ write verbose or unexpectedly inefficient code:
 
 - Need to use different constructor functions for different types and dimensionalities
 - Clojure compiler sometimes does not know the static type of arrays and may emit inefficient bytecode (especially for multi-dimensional arrays)
-- Array type hints tend to be cryptic (e.g. `[[D`, `[Ljava.lang.String;`, etc.) and occasionally pretty hard for humans to write manually
+- Array type hints tend to be cryptic (e.g. `[[D`, `[Ljava.lang.String;`, etc.) and can occasionally be quite hard for humans to write manually
+  - Array class syntax introduced in Clojure 1.12 have mitigated this issue to some extent
 
 These issues have been pointed out by various Clojurians out there in the past:
 
@@ -144,6 +145,16 @@ and so on.
 > For primitive types, `T` can also be represented as a keyword instead of a bare symbol
 > (as in `[:int]` or `[[:double]]`). This is useful to avoid issues with automatic
 > namespace qualification in the syntax quote and false alerts reported by the linter.
+
+Since 0.3.0, [array class syntax](https://github.com/clojure/clojure/blob/master/changes.md#27-array-class-syntax) introduced in Clojure 1.12 can be used interchangeably with array type descriptors anywhere within the library:
+
+```clojure
+(def arr1 (sa/new String/1 5))
+(class arr1) ;=> [Ljava.lang.String;
+
+(def arr2 (sa/new int/2 2 3))
+(class arr2) ;=> [[I
+```
 
 #### `(new [T] [e1 e2 ... ek])`
 
