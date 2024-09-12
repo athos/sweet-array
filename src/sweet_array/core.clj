@@ -22,31 +22,34 @@
             (throw
              (ex-info (str "Invalid array type descriptor: " (pr-str type-desc))
                       {:descriptor type-desc})))
-          (step [desc]
+          (step [desc toplevel?]
             (cond (vector? desc)
                   (if (= (count desc) 1)
-                    (str \[ (step (first desc)))
+                    (str \[ (step (first desc) false))
                     (error!))
 
                   (ident? desc)
                   (or (when (nil? (namespace desc))
-                        (let [desc' (name desc)]
-                          (case desc'
-                            "boolean" "Z" "byte" "B" "char" "C" "short" "S"
-                            "int" "I" "long" "J" "float" "F" "double" "D"
+                        (let [desc' (name desc)
+                              t (case desc'
+                                  "boolean" "Z" "byte" "B" "char" "C" "short" "S"
+                                  "int" "I" "long" "J" "float" "F" "double" "D"
+                                  nil)]
+                          (if t
+                            (if toplevel?
+                              (error!)
+                              t)
                             (array-type-tags desc'))))
                       (when-let [ret (and (symbol? desc) (resolve desc))]
                         (when (class? ret)
-                          (str \L (.getName ^Class ret) \;)))
+                          (if (.isArray ^Class ret)
+                            (.getName ret)
+                            (when-not toplevel?
+                              (str \L (.getName ^Class ret) \;)))))
                       (error!))
 
                   :else (error!)))]
-    (when-not (or (vector? type-desc)
-                  (and (ident? type-desc)
-                       (nil? (namespace type-desc))
-                       (array-type-tags (name type-desc))))
-      (error!))
-    (step type-desc)))
+    (step type-desc true)))
 
 (defmacro tag [desc]
   (tag-fn desc))
