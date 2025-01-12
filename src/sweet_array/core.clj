@@ -43,7 +43,7 @@
                       (when-let [ret (and (symbol? desc) (resolve desc))]
                         (when (class? ret)
                           (if (.isArray ^Class ret)
-                            (.getName ret)
+                            (.getName ^Class ret)
                             (when-not toplevel?
                               (str \L (.getName ^Class ret) \;)))))
                       (error!))
