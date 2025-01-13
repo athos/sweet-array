@@ -463,6 +463,7 @@ array type descriptors:
 ```
       <array type descriptor> ::= '[' + <component type> + ']'
                                 | <array type alias>
+                                | <symbolic array type>
 
              <component type> ::= <primitive type name>
                                 | <reference type name>
@@ -497,6 +498,11 @@ array type descriptors:
                                 | 'objects'
 
    <keyword array type alias> ::= ':' + <symbol array type alias>
+
+        <symbolic array type> ::= <symbol primitive type name> + '/' + <num of dimensions>
+                                | <reference type name> + '/' + <num of dimensions>
+
+           <num of dimesions> ::= '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
 ```
 
 An array type descriptor `[T]` denotes an array whose component type is `T`.
@@ -504,10 +510,11 @@ The component type itself may be an array type. For instance, `[[T]]` denotes
 the two-dimensional array type of `T`, `[[[T]]]` denotes the three-dimensional
 array type of `T`, and so on.
 
-Array type aliases, such as `ints` and `doubles`, may also be used as array type
+Both array type aliases (e.g. `ints` and `doubles`) and array class syntax introduced
+in Clojure 1.12 (e.g. `int/1` and `String/2`) may also be used as array type
 descriptors. They are completely interchangeable with their corresponding array type
-descriptor: `ints` is equivalent to `[int]` and `[doubles]` is equivalent to `[[double]]`,
-and so on.
+descriptor: `ints` and `int/1` are equivalent to `[int]`, and `[doubles]` and
+`double/2` are equivalent to `[[double]]`, and so on.
 
 ## License
 
