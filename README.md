@@ -60,27 +60,27 @@ As a result, we can write code like the following using `sweet-array`:
         (sa/aset c i j
                  (+ (* (sa/aget a i k)
                        (sa/aget b k j))
-                   (sa/aget c i j))))))
+                    (sa/aget c i j))))))
   c)
 ```
 
 Instead of:
 
 ```clojure
-(def ^"[[D" a (into-array [(double-array [1.0 2.0]) (double-array [3.0 4.0])]))
-(def ^"[[D" b (into-array [(double-array [5.0 6.0]) (double-array [7.0 8.0])]))
+(def ^double/2 a (into-array [(double-array [1.0 2.0]) (double-array [3.0 4.0])]))
+(def ^double/2 b (into-array [(double-array [5.0 6.0]) (double-array [7.0 8.0])]))
 
 (let [nrows (alength a)
-      ncols (alength ^doubles (aget b 0))
+      ncols (alength ^double/1 (aget b 0))
       n (alength b)
-      ^"[[D" c (make-array Double/TYPE nrows ncols)]
+      ^double/2 c (make-array Double/TYPE nrows ncols)]
   (dotimes [i nrows]
     (dotimes [j ncols]
       (dotimes [k n]
-        (aset ^doubles (aget c i) j
-              (+ (* (aget ^doubles (aget a i) k)
-                    (aget ^doubles (aget b k) j))
-                  (aget ^doubles (aget c i) j))))))
+        (aset ^double/1 (aget c i) j
+              (+ (* (aget ^double/1 (aget a i) k)
+                    (aget ^double/1 (aget b k) j))
+                 (aget ^double/1 (aget c i) j))))))
   c)
 ```
 
@@ -114,7 +114,7 @@ which can be used to create both primitive and reference type arrays:
 (require '[sweet-array.core :as sa])
 
 (def xs (sa/new [int] 3))
-(class xs) ;=> [I, which means int array type
+(class xs) ;=> int/1, which means int array type
 (alength xs) ;=> 3
 
 (def ys (sa/new [String] 5))
@@ -132,7 +132,7 @@ The following example creates a two-dimensional int array:
 
 ```clojure
 (def arr (sa/new [[int]] 2 3))
-(class arr) ;=> [[I, which means 2-d int array type
+(class arr) ;=> int/2, which means 2-d int array type
 (alength arr) ;=> 2
 (alength (aget arr 0)) ;=> 3
 ```
@@ -150,10 +150,10 @@ Since 0.3.0, [array class syntax](https://github.com/clojure/clojure/blob/master
 
 ```clojure
 (def arr1 (sa/new String/1 5))
-(class arr1) ;=> [Ljava.lang.String;
+(class arr1) ;=> java.lang.String/1
 
 (def arr2 (sa/new int/2 2 3))
-(class arr2) ;=> [[I
+(class arr2) ;=> int/2
 ```
 
 #### `(new [T] [e1 e2 ... ek])`
@@ -206,7 +206,7 @@ Another way to create an array is to use the `sweet-array.core/into-array` macro
 (require '[sweet-array.core :as sa])
 
 (def arr (sa/into-array [int] (range 10)))
-(class arr) ;=> [I
+(class arr) ;=> int/1
 (alength arr) ;=> 10
 ```
 
@@ -218,7 +218,7 @@ type is specified with the [array type descriptor](#array-type-notation) as the 
 
 ```clojure
 (def arr' (sa/into-array [[int]] (partition 2 (range 10))))
-(class arr') ;=> [[I
+(class arr') ;=> int/2
 [(aget arr' 0 0) (aget arr' 0 1) (aget arr' 1 0) (aget arr' 1 1)]
 ;=> [0 1 2 3]
 ```
@@ -387,18 +387,14 @@ represented with an [array type descriptor](#array-type-notation):
 ```clojure
 (require '[sweet-array.core :as sa])
 
-(sa/type [int]) ;=> [I
-(sa/type [String]) ;=> [Ljava.lang.String;
-(sa/type [[double]]) ;=> [[D
+(sa/type [int]) ;=> int/1
+(sa/type [String]) ;=> java.lang.String/1
+(sa/type [[double]]) ;=> double/2
 ```
 
-Each form shown above is more concise and straightforward than the corresponding traditional code:
-
-```clojure
-(class (int-array 0)) ;=> [I
-(class (make-array String 0)) ;=> [Ljava.lang.String;
-(class (make-array Double/TYPE 0 0)) ;=> [[D
-```
+> [!NOTE]
+> It is recommended to use the array class syntax instead of the `type` macro
+> when using Clojure 1.12 or later.
 
 #### `(instance? [T] expr)`
 
@@ -453,6 +449,10 @@ This code compiles without any reflection warning, just as with:
 (defn ^"[Ljava.lang.String;" select-randomly [^"[[Ljava.lang.String;" arr]
   (sa/aget arr (rand-int (alength arr))))
 ```
+
+> [!NOTE]
+> It is recommended to use the array class syntax instead of the `#sweet/tag`
+> type hint when using Clojure 1.12 or later.
 
 ## Array type notation
 
