@@ -5,6 +5,11 @@
   (:import [clojure.lang RT]
            [java.lang.reflect Array]))
 
+(def array-class-syntax-supported?
+  (try
+    (and (read-string "int/1") true)
+    (catch Exception _ false)))
+
 (defn- type->tag [^Class type]
   (.getName type))
 
@@ -80,6 +85,11 @@
   [x]
   (array-type? (class x)))
 
+(defn- type->str [^Class type]
+  (if (and array-class-syntax-supported? (array-type? type))
+    (pr-str type)
+    (.getName type)))
+
 (defn- warn [fmt & vals]
   (binding [*out* *err*]
     (apply printf fmt vals)
@@ -114,7 +124,7 @@
       (let [form (::form (meta &form))
             msg (str "Can't apply aget to "
                      (pr-str (second form))
-                     ", which is " (.getName t) ", not array")]
+                     ", which is " (type->str t) ", not array")]
         (throw (ex-info msg {:form form})))
       (loop [t t, arr arr, idx (cons idx more), n 0]
         (if (seq idx)
@@ -161,7 +171,7 @@
       (let [form (::form (meta &form))
             msg (str "Can't apply aset to "
                      (pr-str (second form))
-                     ", which is " (.getName t) ", not array")]
+                     ", which is " (type->str t) ", not array")]
         (throw (ex-info msg {:form form})))
       (let [[more v] ((juxt butlast last) idxv)
             vtype (loop [t (.getComponentType t), more more, n 1]
@@ -241,7 +251,7 @@
               (if (array-type? t')
                 (recur (.getComponentType t') (rest args') (inc n))
                 (throw
-                 (ex-info (str (.getName t) " can't take more than "
+                 (ex-info (str type-desc " can't take more than "
                                (count args) " index(es)")
                           {})))
               (with-meta
@@ -260,7 +270,7 @@
       (let [form (::form (meta &form))
             msg (str "Can't apply aclone to "
                      (pr-str (second form))
-                     ", which is " (.getName t) ", not array")]
+                     ", which is " (type->str t) ", not array")]
         (throw (ex-info msg {:form form}))))
     `(c/aclone ~arr)))
 
@@ -339,20 +349,20 @@
 
           (and inferred-type (not (array-type? inferred-type)))
           (let [msg (str "Can't use sweet-array.core/def for " (pr-str expr)
-                         ", which is " (.getName inferred-type) ", not array")]
+                         ", which is " (type->str inferred-type) ", not array")]
             (throw (ex-info msg {:inferred-type inferred-type})))
 
           (and hinted-type (not (array-type? hinted-type)))
           (let [msg (format "Hinted type (%s) is not an array type"
-                            (.getName hinted-type))]
+                            (type->str hinted-type))]
             (throw (ex-info msg {:hinted-type hinted-type})))
 
           (and hinted-type
                inferred-type
                (not (.isAssignableFrom hinted-type inferred-type)))
           (let [msg (format "Inferred type (%s) is not compatible with hinted type (%s)"
-                            (.getName inferred-type)
-                            (.getName hinted-type))]
+                            (type->str inferred-type)
+                            (type->str hinted-type))]
             (throw (ex-info msg {:hinted-type hinted-type
                                  :inferred-type inferred-type})))
 
