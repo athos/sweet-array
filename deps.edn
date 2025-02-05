@@ -1,7 +1,10 @@
 {:paths ["src"]
- :deps {dev.athos/type-infer {:mvn/version "0.1.2"}}
+ :deps {org.clojure/clojure {:mvn/version "1.12.0"}
+        dev.athos/type-infer {:mvn/version "0.1.2"}}
  :aliases
- {:check
+ {:1.10 {:extra-deps {org.clojure/clojure {:mvn/version "1.10.3"}}}
+  :1.11 {:extra-deps {org.clojure/clojure {:mvn/version "1.11.4"}}}
+  :check
   {:extra-deps
    {io.github.athos/clj-check {:git/tag "0.1.0" :git/sha "0ca84df"}}
    :main-opts ["-m" "clj-check.check"]}
