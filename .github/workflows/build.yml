@@ -31,6 +31,12 @@ jobs:
         clojure -A:check:test:coverage -P
     - name: Run check
       run: clojure -M:check
+    - name: Run tests
+      run: clojure -M:test
+    - name: Run tests for 1.11
+      run: clojure -M:test:1.11
+    - name: Run tests for 1.10
+      run: clojure -M:test:1.10
     - name: Measure test coverage
       run: clojure -M:test:coverage
     - name: Upload coverage report to CodeCov
