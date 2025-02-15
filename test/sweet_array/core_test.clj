@@ -3,6 +3,24 @@
             [sweet-array.core :as sa]
             [type-infer.core :refer [infer]]))
 
+(defmacro eval-when-array-class-syntax-is-available [& body]
+  (when @#'sa/array-class-syntax-supported?
+    `(do ~@body)))
+
+(defmacro $ [expr-str]
+  (read-string expr-str))
+
+(defn- array-= [arr1 arr2]
+  (let [c1 (class arr1)
+        c2 (class arr2)]
+    (and (.isArray c1)
+         (.isArray c2)
+         (= c1 c2)
+         (= (count arr1) (count arr2))
+         (if (.isArray (.getComponentType c1))
+           (every? true? (map array-= arr1 arr2))
+           (= (seq arr1) (seq arr2))))))
+
 (deftest type-test
   (is (= (type (boolean-array 0))
          (sa/type [boolean])
@@ -68,6 +86,19 @@
     ["double"]
     [int int]
     [UnknownClass]))
+
+(eval-when-array-class-syntax-is-available
+ (deftest type-with-array-class-syntax-test
+   (is (= (sa/type [boolean])
+          ($ "(sa/type boolean/1)")))
+   (is (= (sa/type [byte])
+          ($ "(sa/type byte/1)")))
+   (is (= (sa/type [[int]])
+          ($ "(sa/type int/2)")))
+   (is (= (sa/type [Object])
+          ($ "(sa/type Object/1)")))
+   (is (= (sa/type [[String]])
+          ($ "(sa/type java.lang.String/2)")))))
 
 (deftest instance?-test
   (is (sa/instance? [int] (int-array [1 2 3])))
@@ -193,6 +224,25 @@
     (is (= [0 1 2] (seq (aget arr 0))))
     (is (= [3 4] (seq (aget arr 1)))))
   (is (thrown? Throwable (macroexpand `(sa/new [~'int] 2 3)))))
+
+(eval-when-array-class-syntax-is-available
+ (deftest new-with-array-class-syntax-test
+   (are [expr-str expected]
+        (array-= expected ($ expr-str))
+     "(sa/new int/1 [1 2 3])"
+     (sa/new [int] [1 2 3])
+
+     "(sa/new String/1 3)"
+     (sa/new [String] 3)
+
+     "(sa/new double/2 [[0.0 1.0] [1.0 0.0]])"
+     (sa/new [[double]] [[0.0 1.0] [1.0 0.0]])
+
+     "(sa/new java.lang.Object/2 2 2)"
+     (sa/new [[Object]] 2 2)
+
+     "(sa/new char/3 [[[\\a \\b \\c]] [[\\d \\e] [\\f]]])"
+     (sa/new [[[char]]] [[[\a \b \c]] [[\d \e] [\f]]]))))
 
 (def ^String s "foobar")
 
