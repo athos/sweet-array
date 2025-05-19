@@ -118,7 +118,7 @@ which can be used to create both primitive and reference type arrays:
 (alength xs) ;=> 3
 
 (def ys (sa/new [String] 5))
-(class ys) ;=> [Ljava.lang.String;, which means String array type
+(class ys) ;=> java.lang.String/1, which means String array type
 (alength ys) ;=> 5
 ```
 
