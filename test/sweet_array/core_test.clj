@@ -8,7 +8,8 @@
     `(do ~@body)))
 
 (defmacro $ [expr-str]
-  (read-string expr-str))
+  (binding [*default-data-reader-fn* (#'sa/array-literal-reader-fn nil)]
+    (read-string expr-str)))
 
 (defn- array-= [arr1 arr2]
   (let [c1 (class arr1)
@@ -382,11 +383,33 @@
                    (macroexpand
                     `(sa/aset arr-without-type-hint 0 0 42)))))))
 
+(eval-when-array-class-syntax-is-available
+ (deftest array-literal-test
+   (are [expr-str expected]
+        (array-= expected ($ expr-str))
+     "#int/1 [1 2 3]"
+     (sa/new [int] [1 2 3])
+
+     "#String/1 [\"foo\" \"bar\"]"
+     (sa/new [String] ["foo" "bar"])
+
+     "#double/2 [[0.0 1.0] [1.0 0.0]]"
+     (sa/new [[double]] [[0.0 1.0] [1.0 0.0]])
+
+     "#java.lang.Object/2 [[\"foo\" \"bar\"] [:foo :bar] ['foo 'bar]]"
+     (sa/new [[Object]] [["foo" "bar"] [:foo :bar] ['foo 'bar]])
+
+     "#char/3 [[[\\a \\b \\c]] [[\\d \\e] [\\f]]]"
+     (sa/new [[[char]]] [[[\a \b \c]] [[\d \e] [\f]]]))))
+
 (sa/def arr1 (int-array [1 2 3]))
 (sa/def arr2 (sa/into-array [[double]] (partition-all 2) (range 4)))
 (sa/def arr3 (sa/cast [String] (into-array String ["foo"])))
 (sa/def ^ints arr4 (into-array Integer/TYPE [1 2 3]))
 (sa/def ^#sweet/tag [CharSequence] arr5 (sa/new [String] ["foo"]))
+(eval-when-array-class-syntax-is-available
+ (sa/def arr6 ($ "(sa/new int/2 [[0 1 2 3]])"))
+ (sa/def arr7 ($ "#double/1 [0.0 1.0]")))
 
 (deftest def-test
   (is (= (sa/type [int]) (infer arr1)))
@@ -394,6 +417,9 @@
   (is (= (sa/type [String]) (infer arr3)))
   (is (= (sa/type [int]) (infer arr4)))
   (is (= (sa/type [CharSequence]) (infer arr5)))
+  (eval-when-array-class-syntax-is-available
+   (is (= (sa/type [[int]]) (infer arr6)))
+   (is (= (sa/type [double]) (infer arr7))))
   (are [form] (thrown? Exception
                        (binding [*ns* (the-ns 'sweet-array.core-test)]
                          (eval form)))
