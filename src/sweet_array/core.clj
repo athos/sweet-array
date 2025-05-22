@@ -370,3 +370,34 @@
           `(def ~(vary-meta name assoc :tag (or hinted-type inferred-type))
              ~@(when docstr [docstr])
              ~sym))))
+
+(defn- array-literal-reader-fn [default-reader-fn]
+  (fn [tag val]
+    (or (when-let [x (resolve tag)]
+          (when (and (class? x) (.isArray ^Class x))
+            `(sweet-array.core/new ~tag ~val)))
+        (if default-reader-fn
+          (default-reader-fn tag val)
+          (throw (ex-info (str "No reader function for tag " tag) {}))))))
+
+(defn install-array-literals!
+  "Experimental - Enables array literals globally.
+
+  This function is intended for use in `user.clj` or other initialization code to
+  enable array literals. Note: This function has no effect when used from the REPL.
+  Use `use-array-literals!` to enable array literals interactively in the REPL."
+  {:added "0.3.0"}
+  []
+  (alter-var-root #'*default-data-reader-fn* array-literal-reader-fn)
+  nil)
+
+(defn use-array-literals!
+  "Experimental - Enables array literals for the current REPL session.
+
+  Use this function when working in the REPL. Note: This function will throw an error
+  if used in `user.clj`. If you need to enable array literals for code written
+  in files, use `install-array-literals!` instead."
+  {:added "0.3.0"}
+  []
+  (set! *default-data-reader-fn* (array-literal-reader-fn *default-data-reader-fn*))
+  nil)
