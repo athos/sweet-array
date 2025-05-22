@@ -14,6 +14,7 @@ Array manipulation library for Clojure with "sweet" array type notation and more
   - [Array definition](#array-definition)
   - [Array indexing](#array-indexing)
   - [Type-related utilities](#type-related-utilities)
+  - [Array literals](#array-literals)
 - [Array type notation](#array-type-notation)
 
 ## Rationale
@@ -453,6 +454,51 @@ This code compiles without any reflection warning, just as with:
 > [!NOTE]
 > It is recommended to use the array class syntax instead of the `#sweet/tag`
 > type hint when using Clojure 1.12 or later.
+
+### Array literals
+
+Since 0.3.0, `sweet-array` provides experimental support for *array literals*
+(This feature requires Clojure 1.12 or later).
+
+Array literals allow you to create one- or multi-dimensional arrays in a concise
+and readable way. Once enabled, you can write Java arrays of any type and dimensionality
+using tagged literals like:
+
+```clojure
+#int/1 [1 2 3]
+;; equivalent to (sa/new int/1 [1 2 3])
+
+#double/2 [[1.0 0.0] [0.0 1.0]]
+;; equivalent to (sa/new double/2 [[1.0 0.0] [0.0 1.0]])
+
+#String/1 ["foo" "bar"]
+;; equivalent to (sa/new String/1 ["foo" "bar"])
+```
+
+There are two ways to enable array literals, depending on the context in which you're using them.
+
+To enable array literals throughout your project or application code, call
+`sweet-array.core/install-array-literals!` from your `user.clj`:
+
+```clojure
+;; user.clj
+(require '[sweet-array.core :as sa])
+
+(sa/install-array-literals!)
+```
+
+Note that this function has no effect when called from the REPL. To experiment
+with array literals during a REPL session, call `sweet-array.core/use-array-literals!`
+instead.
+
+This temporarily enables array literal support only for the current REPL session,
+even if `sweet-array.core/install-array-literals!` was not used in `user.clj`:
+
+```clojure
+user=> (require '[sweet-array.core :as sa])
+user=> (sa/use-array-literals!)
+user=> (sa/array? #int/1 [10 20 30]) ;=> true
+```
 
 ## Array type notation
 
