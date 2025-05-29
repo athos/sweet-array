@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file. This change log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.3.0] - 2025-05-29
 ### Added
 - [#9](https://github.com/athos/sweet-array/pull/9) Support for array class syntax as alternative for array type descriptors
 - [#16](https://github.com/athos/sweet-array/pull/16) Experimental support for array literals
@@ -17,6 +19,7 @@ All notable changes to this project will be documented in this file. This change
 ## [0.1.0] - 2021-11-23
 - First release
 
-[Unreleased]: https://github.com/athos/sweet-array/compare/0.1.0...HEAD
+[Unreleased]: https://github.com/athos/sweet-array/compare/0.3.0...HEAD
+[0.3.0]: https://github.com/athos/sweet-array/compare/0.2.0...0.3.0
 [0.2.0]: https://github.com/athos/sweet-array/compare/0.1.0...0.2.0
 [0.1.0]: https://github.com/athos/sweet-array/releases/tag/0.1.0

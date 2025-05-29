@@ -3,7 +3,7 @@
             [org.corfield.build :as bb]))
 
 (def lib 'dev.athos/sweet-array)
-(def version "0.2.0")
+(def version "0.3.0")
 (def tag (b/git-process {:git-args "rev-parse HEAD"}))
 
 (defn clean [opts]
