@@ -51,6 +51,10 @@ As a result, we can write code like the following using `sweet-array`:
 (sa/def a (sa/new [[double]] [[1.0 2.0] [3.0 4.0]]))
 (sa/def b (sa/new [[double]] [[5.0 6.0] [7.0 8.0]]))
 
+;; Or, you can write it like this:
+;;  (sa/def a (sa/new double/2 [[1.0 2.0] [3.0 4.0]]))
+;;  (sa/def b (sa/new double/2 [[5.0 6.0] [7.0 8.0]]))
+
 (let [nrows (alength a)
       ncols (alength (sa/aget b 0))
       n (alength b)
